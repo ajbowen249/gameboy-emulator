@@ -5,6 +5,7 @@
 
 enum Opcode : uint8_t {
     // Load Immediate
+    LD_A_n = 0x3e,
     LD_B_n = 0x06,
     LD_C_n = 0x0e,
     LD_D_n = 0x16,

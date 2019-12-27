@@ -44,6 +44,7 @@ int8_t CPU::decodeAndExecute() {
     uint8_t opcode = _memory->read(_programCounter++);
 
     switch(opcode) {
+        case Opcode::LD_A_n:
         case Opcode::LD_B_n:
         case Opcode::LD_C_n:
         case Opcode::LD_D_n:
@@ -124,6 +125,7 @@ int8_t CPU::I_LoadImmediate(uint8_t opcode) {
     uint8_t value = _memory->read(_programCounter++);
 
     switch(opcode) {
+        case Opcode::LD_A_n: _regA = value; break;
         case Opcode::LD_B_n: _regB = value; break;
         case Opcode::LD_C_n: _regC = value; break;
         case Opcode::LD_D_n: _regD = value; break;
@@ -135,63 +137,24 @@ int8_t CPU::I_LoadImmediate(uint8_t opcode) {
     return  2;
 }
 
+#define REG_TRANSFER_GROUP(reg) \
+        case Opcode::LD_##reg##_A: _reg##reg = _regA; break; \
+        case Opcode::LD_##reg##_B: _reg##reg = _regB; break; \
+        case Opcode::LD_##reg##_C: _reg##reg = _regC; break; \
+        case Opcode::LD_##reg##_D: _reg##reg = _regD; break; \
+        case Opcode::LD_##reg##_E: _reg##reg = _regE; break; \
+        case Opcode::LD_##reg##_H: _reg##reg = _regH; break; \
+        case Opcode::LD_##reg##_L: _reg##reg = _regL; break; \
+
 int8_t CPU::I_TransferRegister(uint8_t opcode) {
     switch(opcode) {
-        case Opcode::LD_A_A: _regA = _regA; break;
-        case Opcode::LD_A_B: _regA = _regB; break;
-        case Opcode::LD_A_C: _regA = _regC; break;
-        case Opcode::LD_A_D: _regA = _regD; break;
-        case Opcode::LD_A_E: _regA = _regE; break;
-        case Opcode::LD_A_H: _regA = _regH; break;
-        case Opcode::LD_A_L: _regA = _regL; break;
-
-        case Opcode::LD_B_A: _regB = _regA; break;
-        case Opcode::LD_B_B: _regB = _regB; break;
-        case Opcode::LD_B_C: _regB = _regC; break;
-        case Opcode::LD_B_D: _regB = _regD; break;
-        case Opcode::LD_B_E: _regB = _regE; break;
-        case Opcode::LD_B_H: _regB = _regH; break;
-        case Opcode::LD_B_L: _regB = _regL; break;
-
-        case Opcode::LD_C_A: _regC = _regA; break;
-        case Opcode::LD_C_B: _regC = _regB; break;
-        case Opcode::LD_C_C: _regC = _regC; break;
-        case Opcode::LD_C_D: _regC = _regD; break;
-        case Opcode::LD_C_E: _regC = _regE; break;
-        case Opcode::LD_C_H: _regC = _regH; break;
-        case Opcode::LD_C_L: _regC = _regL; break;
-
-        case Opcode::LD_D_A: _regD = _regA; break;
-        case Opcode::LD_D_B: _regD = _regB; break;
-        case Opcode::LD_D_C: _regD = _regC; break;
-        case Opcode::LD_D_D: _regD = _regD; break;
-        case Opcode::LD_D_E: _regD = _regE; break;
-        case Opcode::LD_D_H: _regD = _regH; break;
-        case Opcode::LD_D_L: _regD = _regL; break;
-
-        case Opcode::LD_E_A: _regE = _regA; break;
-        case Opcode::LD_E_B: _regE = _regB; break;
-        case Opcode::LD_E_C: _regE = _regC; break;
-        case Opcode::LD_E_D: _regE = _regD; break;
-        case Opcode::LD_E_E: _regE = _regE; break;
-        case Opcode::LD_E_H: _regE = _regH; break;
-        case Opcode::LD_E_L: _regE = _regL; break;
-
-        case Opcode::LD_H_A: _regH = _regA; break;
-        case Opcode::LD_H_B: _regH = _regB; break;
-        case Opcode::LD_H_C: _regH = _regC; break;
-        case Opcode::LD_H_D: _regH = _regD; break;
-        case Opcode::LD_H_E: _regH = _regE; break;
-        case Opcode::LD_H_H: _regH = _regH; break;
-        case Opcode::LD_H_L: _regH = _regL; break;
-
-        case Opcode::LD_L_A: _regL = _regA; break;
-        case Opcode::LD_L_B: _regL = _regB; break;
-        case Opcode::LD_L_C: _regL = _regC; break;
-        case Opcode::LD_L_D: _regL = _regD; break;
-        case Opcode::LD_L_E: _regL = _regE; break;
-        case Opcode::LD_L_H: _regL = _regH; break;
-        case Opcode::LD_L_L: _regL = _regL; break;
+        REG_TRANSFER_GROUP(A);
+        REG_TRANSFER_GROUP(B);
+        REG_TRANSFER_GROUP(C);
+        REG_TRANSFER_GROUP(D);
+        REG_TRANSFER_GROUP(E);
+        REG_TRANSFER_GROUP(H);
+        REG_TRANSFER_GROUP(L);
     }
 
     return 1;

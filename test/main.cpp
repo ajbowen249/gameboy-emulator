@@ -136,25 +136,28 @@ TEST_CASE("rw C") {
 TEST_CASE("load immediate") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    // This program sets B, C, D, E, H, and L to 1, through 6.
+    // This program sets A, through L to 1, through 7.
     // No flags should be impacted.
     simpleMemory->write(INIT_VECTOR, {
-        Opcode::LD_B_n,
+        Opcode::LD_A_n,
         0x01,
-        Opcode::LD_C_n,
+        Opcode::LD_B_n,
         0x02,
-        Opcode::LD_D_n,
+        Opcode::LD_C_n,
         0x03,
-        Opcode::LD_E_n,
+        Opcode::LD_D_n,
         0x04,
-        Opcode::LD_H_n,
+        Opcode::LD_E_n,
         0x05,
-        Opcode::LD_L_n,
+        Opcode::LD_H_n,
         0x06,
+        Opcode::LD_L_n,
+        0x07,
     });
 
     // Zero out the registers and flags to get to a known state.
     testCPU._flags = 0;
+    testCPU._regA = 0;
     testCPU._regB = 0;
     testCPU._regC = 0;
     testCPU._regD = 0;
@@ -162,19 +165,22 @@ TEST_CASE("load immediate") {
     testCPU._regH = 0;
     testCPU._regL = 0;
 
-    // Each instruction takes 8 clock cycles (2 machine cycles). 48 clocks
-    // should be exactly enough to execute the program up.
+    // Each instruction takes 8 clock cycles (2 machine cycles). 56 clocks
+    // should be exactly enough to execute the program.
 
-    CLOCK(48);
+    CLOCK(56);
 
-    CHECK(testCPU._regB == 0x01);
-    CHECK(testCPU._regC == 0x02);
-    CHECK(testCPU._regD == 0x03);
-    CHECK(testCPU._regE == 0x04);
-    CHECK(testCPU._regH == 0x05);
-    CHECK(testCPU._regL == 0x06);
+    CHECK(testCPU._regA == 0x01);
+    CHECK(testCPU._regB == 0x02);
+    CHECK(testCPU._regC == 0x03);
+    CHECK(testCPU._regD == 0x04);
+    CHECK(testCPU._regE == 0x05);
+    CHECK(testCPU._regH == 0x06);
+    CHECK(testCPU._regL == 0x07);
 
-    CHECK(testCPU._programCounter == INIT_VECTOR + 12);
+    CHECK(testCPU._flags == 0);
+
+    CHECK(testCPU._programCounter == INIT_VECTOR + 14);
 }
 
 #define REGISTER_STORAGE_TEST(reg, idx) \
