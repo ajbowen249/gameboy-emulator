@@ -2,6 +2,8 @@
 
 #include "Opcodes.h"
 
+#include <iostream>
+
 // Combo Registers ////////////////////////////////////////////////////////////
 TEST_CASE("read BC") {
     WITH_CPU_AND_SIMPLE_MEMORY();
@@ -161,11 +163,9 @@ TEST_CASE("load immediate") {
     testCPU._regL = 0;
 
     // Each instruction takes 8 clock cycles (2 machine cycles). 48 clocks
-    // should be exactly enough to execute the program.
+    // should be exactly enough to execute the program up.
 
-    for (int i = 0; i < 48; i++) {
-        testCPU.clock();
-    }
+    CLOCK(48);
 
     CHECK(testCPU._regB == 0x01);
     CHECK(testCPU._regC == 0x02);
@@ -175,4 +175,34 @@ TEST_CASE("load immediate") {
     CHECK(testCPU._regL == 0x06);
 
     CHECK(testCPU._programCounter == INIT_VECTOR + 12);
+}
+
+TEST_CASE("transfer register") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    // r->A
+    testCPU._regA = 0x00;
+    testCPU._regB = 0x01;
+    testCPU._regC = 0x02;
+    testCPU._regD = 0x03;
+    testCPU._regE = 0x04;
+    testCPU._regH = 0x05;
+    testCPU._regL = 0x06;
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LD_A_A,
+        Opcode::LD_A_B,
+        Opcode::LD_A_C,
+        Opcode::LD_A_D,
+        Opcode::LD_A_E,
+        Opcode::LD_A_H,
+        Opcode::LD_A_L,
+    });
+
+    for (int i = 0; i < 7; i++) {
+        // All of these take 1 machine cycle
+        CLOCK(4);
+        CHECK(testCPU._regA == (uint8_t)i);
+        CHECK(testCPU._programCounter == INIT_VECTOR + i + 1);
+    }
 }
