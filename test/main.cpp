@@ -338,3 +338,31 @@ TEST_CASE("store literal to HL address") {
 
     CHECK(simpleMemory->read(testAddress) == 0x12);
 }
+
+TEST_CASE("store A to address") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LD_aBC_A,
+        Opcode::LD_aDE_A,
+        Opcode::LD_aNN_A,
+        0x02,
+        0x00,
+    });
+
+    simpleMemory->write(0x0000, { 0x00, 0x00, 0x00 });
+
+    testCPU.regBC(0x0000);
+    testCPU.regDE(0x0001);
+
+    testCPU._regA = 0x01;
+    CLOCK(8);
+    testCPU._regA = 0x02;
+    CLOCK(8);
+    testCPU._regA = 0x03;
+    CLOCK(16);
+
+    CHECK(simpleMemory->read(0x0000) == 0x01);
+    CHECK(simpleMemory->read(0x0001) == 0x02);
+    CHECK(simpleMemory->read(0x0002) == 0x03);
+}

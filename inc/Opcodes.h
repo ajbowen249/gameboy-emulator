@@ -90,6 +90,9 @@ enum Opcode : uint8_t {
     LD_aHL_E = 0x73,
     LD_aHL_H = 0x74,
     LD_aHL_L = 0x75,
+    LD_aBC_A = 0x02,
+    LD_aDE_A = 0x12,
+    LD_aNN_A = 0xEA,
 
     // "Load" Constant->Address
     LD_aHL_n = 0x36,

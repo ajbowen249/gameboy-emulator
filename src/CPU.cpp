@@ -121,7 +121,10 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::LD_aHL_H:
         case Opcode::LD_aHL_L:
         case Opcode::LD_aHL_n:
-            return I_StoreToHLAddress(opcode);
+        case Opcode::LD_aBC_A:
+        case Opcode::LD_aDE_A:
+        case Opcode::LD_aNN_A:
+            return I_StoreToAddress(opcode);
     }
 }
 
@@ -194,7 +197,21 @@ int8_t CPU::I_LoadAddressIntoRegister(uint8_t opcode) {
     return 2;
 }
 
-int8_t CPU::I_StoreToHLAddress(uint8_t opcode) {
+int8_t CPU::I_StoreToAddress(uint8_t opcode) {
+    switch(opcode) {
+        case Opcode::LD_aBC_A:
+            _memory->write(regBC(), _regA);
+            return 2;
+        case Opcode::LD_aDE_A:
+            _memory->write(regDE(), _regA);
+            return 2;
+        case Opcode::LD_aNN_A:
+            const auto addrLow = _memory->read(_programCounter++);
+            const auto addrHigh = _memory->read(_programCounter++);
+            _memory->write(((uint16_t)addrHigh << 8) | (0x00ff & addrLow), _regA);
+            return 4;
+    }
+
     uint8_t value = 0;
     switch(opcode) {
         case Opcode::LD_aHL_A: value = _regA; break;
