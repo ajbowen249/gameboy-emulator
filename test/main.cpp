@@ -366,3 +366,42 @@ TEST_CASE("store A to address") {
     CHECK(simpleMemory->read(0x0001) == 0x02);
     CHECK(simpleMemory->read(0x0002) == 0x03);
 }
+
+TEST_CASE("load A indirect from C") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(0xff00, { 0x00, 0x01, 0x02, 0x03 });
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LD_A_afC,
+        Opcode::LD_A_afC,
+        Opcode::LD_A_afC,
+        Opcode::LD_A_afC,
+    });
+
+    for (int i = 0; i < 4; i++) {
+        testCPU._regC = (uint8_t)i;
+        CLOCK(8);
+        CHECK(testCPU._regA == (uint8_t)i);
+    }
+}
+
+TEST_CASE("store A indirect via C") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(0xff00, { 0xff, 0xff, 0xff, 0xff });
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LD_afC_A,
+        Opcode::LD_afC_A,
+        Opcode::LD_afC_A,
+        Opcode::LD_afC_A,
+    });
+
+    for (int i = 0; i < 4; i++) {
+        testCPU._regC = (uint8_t)i;
+        testCPU._regA = (uint8_t)i;
+        CLOCK(8);
+        CHECK(simpleMemory->read(0xff00 + (uint16_t)i) == (uint8_t)i);
+    }
+}

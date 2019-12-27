@@ -52,7 +52,7 @@ enum Opcode : uint8_t {
     LD_E_D = 0x5A,
     LD_E_E = 0x5B,
     LD_E_H = 0x5C,
-    LD_E_L = 0x5D,
+    LD_E_L = 0x5d,
 
     LD_H_A = 0x67,
     LD_H_B = 0x60,
@@ -65,10 +65,10 @@ enum Opcode : uint8_t {
     LD_L_A = 0x6f,
     LD_L_B = 0x68,
     LD_L_C = 0x69,
-    LD_L_D = 0x6A,
-    LD_L_E = 0x6B,
-    LD_L_H = 0x6C,
-    LD_L_L = 0x6D,
+    LD_L_D = 0x6a,
+    LD_L_E = 0x6b,
+    LD_L_H = 0x6c,
+    LD_L_L = 0x6d,
 
     // Load Address->Register
     LD_A_aHL = 0x7e,
@@ -81,6 +81,7 @@ enum Opcode : uint8_t {
     LD_A_aBC = 0x0a,
     LD_A_aDE = 0x1a,
     LD_A_aNN = 0xfa,
+    LD_A_afC = 0xf2,
 
     // "Load" Register->Address
     LD_aHL_A = 0x77,
@@ -92,7 +93,8 @@ enum Opcode : uint8_t {
     LD_aHL_L = 0x75,
     LD_aBC_A = 0x02,
     LD_aDE_A = 0x12,
-    LD_aNN_A = 0xEA,
+    LD_aNN_A = 0xea,
+    LD_afC_A = 0xe2,
 
     // "Load" Constant->Address
     LD_aHL_n = 0x36,

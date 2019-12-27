@@ -112,6 +112,7 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::LD_A_aBC:
         case Opcode::LD_A_aDE:
         case Opcode::LD_A_aNN:
+        case Opcode::LD_A_afC:
             return I_LoadAddressIntoRegister(opcode);
         case Opcode::LD_aHL_A:
         case Opcode::LD_aHL_B:
@@ -124,6 +125,7 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::LD_aBC_A:
         case Opcode::LD_aDE_A:
         case Opcode::LD_aNN_A:
+        case Opcode::LD_afC_A:
             return I_StoreToAddress(opcode);
     }
 }
@@ -168,6 +170,11 @@ int8_t CPU::I_TransferRegister(uint8_t opcode) {
 }
 
 int8_t CPU::I_LoadAddressIntoRegister(uint8_t opcode) {
+    if (opcode == Opcode::LD_A_afC) {
+        _regA = _memory->read(0xff00 + (uint16_t)_regC);
+        return 2;
+    }
+
     switch(opcode) {
         case Opcode::LD_A_aBC:
             _regA = _memory->read(regBC());
@@ -198,6 +205,11 @@ int8_t CPU::I_LoadAddressIntoRegister(uint8_t opcode) {
 }
 
 int8_t CPU::I_StoreToAddress(uint8_t opcode) {
+    if (opcode == Opcode::LD_afC_A) {
+        _memory->write(0xff00 + (uint16_t)_regC, _regA);
+        return 2;
+    }
+
     switch(opcode) {
         case Opcode::LD_aBC_A:
             _memory->write(regBC(), _regA);
