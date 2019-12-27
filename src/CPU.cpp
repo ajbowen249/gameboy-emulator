@@ -164,7 +164,7 @@ int8_t CPU::I_TransferRegister(uint8_t opcode) {
         case Opcode::LD_L_E: _regL = _regE; break;
         case Opcode::LD_L_H: _regL = _regH; break;
         case Opcode::LD_L_L: _regL = _regL; break;
-
-        return 1;
     }
+
+    return 1;
 }
