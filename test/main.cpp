@@ -241,3 +241,41 @@ TEST_CASE("transfer register") {
     REGISTER_STORAGE_TEST(H, 4);
     REGISTER_STORAGE_TEST(L, 5);
 }
+
+TEST_CASE("load HL") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LD_A_aHL,
+        Opcode::LD_B_aHL,
+        Opcode::LD_C_aHL,
+        Opcode::LD_D_aHL,
+        Opcode::LD_E_aHL,
+        Opcode::LD_H_aHL,
+        Opcode::LD_L_aHL,
+    });
+
+    simpleMemory->write(0x00, 0xAA);
+
+    testCPU._regA = 0x00;
+    testCPU._regB = 0x00;
+    testCPU._regC = 0x00;
+    testCPU._regD = 0x00;
+    testCPU._regE = 0x00;
+    testCPU._regH = 0x00;
+    testCPU._regL = 0x00;
+
+    // Run for A-H
+    CLOCK(48);
+    CHECK(testCPU._regA == 0xAA);
+    CHECK(testCPU._regB == 0xAA);
+    CHECK(testCPU._regC == 0xAA);
+    CHECK(testCPU._regD == 0xAA);
+    CHECK(testCPU._regE == 0xAA);
+    CHECK(testCPU._regH == 0xAA);
+
+    // Reset H so the address is correct
+    testCPU._regH = 0x00;
+    CLOCK(8);
+    CHECK(testCPU._regL == 0xAA);
+}

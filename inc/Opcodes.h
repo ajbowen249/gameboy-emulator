@@ -57,7 +57,7 @@ enum Opcode : uint8_t {
     LD_L_H =  0x6C,
     LD_L_L =  0x6D,
 
-    // Load address->Register
+    // Load Address->Register
     LD_A_aHL = 0x7e,
     LD_B_aHL = 0x46,
     LD_C_aHL = 0x4e,

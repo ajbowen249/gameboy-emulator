@@ -83,6 +83,7 @@ private:
 
     int8_t I_LoadImmediate(uint8_t opcode);
     int8_t I_TransferRegister(uint8_t opcode);
+    int8_t I_LoadHLAddressIntoRegister(uint8_t opcode);
 };
 
 #endif // __CPU_h_

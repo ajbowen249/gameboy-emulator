@@ -95,6 +95,14 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::LD_L_H:
         case Opcode::LD_L_L:
             return I_TransferRegister(opcode);
+        case Opcode::LD_A_aHL:
+        case Opcode::LD_B_aHL:
+        case Opcode::LD_C_aHL:
+        case Opcode::LD_D_aHL:
+        case Opcode::LD_E_aHL:
+        case Opcode::LD_H_aHL:
+        case Opcode::LD_L_aHL:
+            return I_LoadHLAddressIntoRegister(opcode);
     }
 }
 
@@ -167,4 +175,20 @@ int8_t CPU::I_TransferRegister(uint8_t opcode) {
     }
 
     return 1;
+}
+
+int8_t CPU::I_LoadHLAddressIntoRegister(uint8_t opcode) {
+    const auto value = _memory->read(regHL());
+
+    switch(opcode) {
+        case Opcode::LD_A_aHL: _regA = value; break;
+        case Opcode::LD_B_aHL: _regB = value; break;
+        case Opcode::LD_C_aHL: _regC = value; break;
+        case Opcode::LD_D_aHL: _regD = value; break;
+        case Opcode::LD_E_aHL: _regE = value; break;
+        case Opcode::LD_H_aHL: _regH = value; break;
+        case Opcode::LD_L_aHL: _regL = value; break;
+    }
+
+    return 2;
 }
