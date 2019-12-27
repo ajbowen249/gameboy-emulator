@@ -177,10 +177,38 @@ TEST_CASE("load immediate") {
     CHECK(testCPU._programCounter == INIT_VECTOR + 12);
 }
 
+#define REGISTER_STORAGE_TEST(reg, idx) \
+    testCPU.reset(); \
+    \
+    testCPU._regB = 0x00; \
+    testCPU._regC = 0x01; \
+    testCPU._regD = 0x02; \
+    testCPU._regE = 0x03; \
+    testCPU._regH = 0x04; \
+    testCPU._regL = 0x05; \
+    \
+    simpleMemory->write(INIT_VECTOR, { \
+        Opcode::LD_##reg##_B, \
+        Opcode::LD_##reg##_C, \
+        Opcode::LD_##reg##_D, \
+        Opcode::LD_##reg##_E, \
+        Opcode::LD_##reg##_H, \
+        Opcode::LD_##reg##_L, \
+        }); \
+    \
+    for (int i = 0; i < 6; i++) { \
+        /* All of these take 1 machine cycle */ \
+        CLOCK(4); \
+        if (i != idx) { \
+            CHECK(testCPU._reg##reg == (uint8_t)i); \
+            CHECK(testCPU._programCounter == INIT_VECTOR + i + 1); \
+        } \
+    } \
+
 TEST_CASE("transfer register") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    // r->A
+    // r->A (not using macro because there's one extra here)
     testCPU._regA = 0x00;
     testCPU._regB = 0x01;
     testCPU._regC = 0x02;
@@ -205,4 +233,11 @@ TEST_CASE("transfer register") {
         CHECK(testCPU._regA == (uint8_t)i);
         CHECK(testCPU._programCounter == INIT_VECTOR + i + 1);
     }
+
+    REGISTER_STORAGE_TEST(B, 0);
+    REGISTER_STORAGE_TEST(C, 1);
+    REGISTER_STORAGE_TEST(D, 2);
+    REGISTER_STORAGE_TEST(E, 3);
+    REGISTER_STORAGE_TEST(H, 4);
+    REGISTER_STORAGE_TEST(L, 5);
 }
