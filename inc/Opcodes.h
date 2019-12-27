@@ -71,19 +71,20 @@ enum Opcode : uint8_t {
     LD_L_L = 0x6d,
 
     // Load Address->Register
-    LD_A_aHL = 0x7e,
-    LD_B_aHL = 0x46,
-    LD_C_aHL = 0x4e,
-    LD_D_aHL = 0x56,
-    LD_E_aHL = 0x5E,
-    LD_H_aHL = 0x66,
-    LD_L_aHL = 0x6E,
-    LD_A_aBC = 0x0a,
-    LD_A_aDE = 0x1a,
-    LD_A_aNN = 0xfa,
-    LD_A_afC = 0xf2,
-    LDD_A_aHL = 0x3a,
-    LDI_A_aHL = 0x2a,
+    LD_A_aHL =   0x7e,
+    LD_B_aHL =   0x46,
+    LD_C_aHL =   0x4e,
+    LD_D_aHL =   0x56,
+    LD_E_aHL =   0x5E,
+    LD_H_aHL =   0x66,
+    LD_L_aHL =   0x6E,
+    LD_A_aBC =   0x0a,
+    LD_A_aDE =   0x1a,
+    LD_A_aNN =   0xfa,
+    LD_A_afC =   0xf2,
+    LDD_A_aHL =  0x3a,
+    LDI_A_aHL =  0x2a,
+    LDH_A_afN =  0xf0,
 
     // "Load" Register->Address
     LD_aHL_A =  0x77,
@@ -99,6 +100,7 @@ enum Opcode : uint8_t {
     LD_afC_A =  0xe2,
     LDD_aHL_A = 0x32,
     LDI_aHL_A = 0x22,
+    LDH_afN_A = 0xe0,
 
     // "Load" Constant->Address
     LD_aHL_n = 0x36,

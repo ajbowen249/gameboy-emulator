@@ -115,6 +115,7 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::LD_A_afC:
         case Opcode::LDD_A_aHL:
         case Opcode::LDI_A_aHL:
+        case Opcode::LDH_A_afN:
             return I_LoadAddressIntoRegister(opcode);
         case Opcode::LD_aHL_A:
         case Opcode::LD_aHL_B:
@@ -130,6 +131,7 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::LD_afC_A:
         case Opcode::LDD_aHL_A:
         case Opcode::LDI_aHL_A:
+        case Opcode::LDH_afN_A:
             return I_StoreToAddress(opcode);
     }
 }
@@ -177,6 +179,10 @@ int8_t CPU::I_LoadAddressIntoRegister(uint8_t opcode) {
     if (opcode == Opcode::LD_A_afC) {
         _regA = _memory->read(0xff00 + (uint16_t)_regC);
         return 2;
+    } else if (opcode == Opcode::LDH_A_afN) {
+        const auto indirectAddress = _memory->read(_programCounter++);
+        _regA = _memory->read(0xff00 + (uint16_t)indirectAddress);
+        return 3;
     }
 
     switch(opcode) {
@@ -220,6 +226,10 @@ int8_t CPU::I_StoreToAddress(uint8_t opcode) {
     if (opcode == Opcode::LD_afC_A) {
         _memory->write(0xff00 + (uint16_t)_regC, _regA);
         return 2;
+    } else if (opcode == Opcode::LDH_afN_A) {
+        const auto indirectAddress = _memory->read(_programCounter++);
+        _memory->write(0xff00 + (uint16_t)indirectAddress, _regA);
+        return 3;
     }
 
     switch(opcode) {

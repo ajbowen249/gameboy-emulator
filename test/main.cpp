@@ -503,3 +503,49 @@ TEST_CASE("incremental HL store") {
         CHECK(simpleMemory->read((uint16_t)i) == 0xaa);
     }
 }
+
+TEST_CASE("load n + ff00") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(0xff00, { 0x00, 0x01, 0x02, 0x03 });
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LDH_A_afN,
+        0x00,
+        Opcode::LDH_A_afN,
+        0x01,
+        Opcode::LDH_A_afN,
+        0x02,
+        Opcode::LDH_A_afN,
+        0x03,
+    });
+
+    for (int i = 0; i < 4; i++) {
+        CLOCK(12);
+        CHECK(testCPU._regA == (uint8_t)i);
+    }
+}
+
+TEST_CASE("store n + ff00") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(0xff00, { 0xff, 0xff, 0xff, 0xff });
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LDH_afN_A,
+        0x00,
+        Opcode::LDH_afN_A,
+        0x01,
+        Opcode::LDH_afN_A,
+        0x02,
+        Opcode::LDH_afN_A,
+        0x03,
+    });
+
+    testCPU._regA = 0xaa;
+    CLOCK(48);
+
+    for (int i = 0; i < 4; i++) {
+        CHECK(simpleMemory->read(0xff00 + (uint16_t)i) == 0xaa);
+    }
+}
