@@ -180,14 +180,16 @@ TEST_CASE("load immediate") {
 #define REGISTER_STORAGE_TEST(reg, idx) \
     testCPU.reset(); \
     \
-    testCPU._regB = 0x00; \
-    testCPU._regC = 0x01; \
-    testCPU._regD = 0x02; \
-    testCPU._regE = 0x03; \
-    testCPU._regH = 0x04; \
-    testCPU._regL = 0x05; \
+    testCPU._regA = 0x00; \
+    testCPU._regB = 0x01; \
+    testCPU._regC = 0x02; \
+    testCPU._regD = 0x03; \
+    testCPU._regE = 0x04; \
+    testCPU._regH = 0x05; \
+    testCPU._regL = 0x06; \
     \
     simpleMemory->write(INIT_VECTOR, { \
+        Opcode::LD_##reg##_A, \
         Opcode::LD_##reg##_B, \
         Opcode::LD_##reg##_C, \
         Opcode::LD_##reg##_D, \
@@ -196,7 +198,7 @@ TEST_CASE("load immediate") {
         Opcode::LD_##reg##_L, \
         }); \
     \
-    for (int i = 0; i < 6; i++) { \
+    for (int i = 0; i < 7; i++) { \
         /* All of these take 1 machine cycle */ \
         CLOCK(4); \
         if (i != idx) { \
@@ -208,38 +210,13 @@ TEST_CASE("load immediate") {
 TEST_CASE("transfer register") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    // r->A (not using macro because there's one extra here)
-    testCPU._regA = 0x00;
-    testCPU._regB = 0x01;
-    testCPU._regC = 0x02;
-    testCPU._regD = 0x03;
-    testCPU._regE = 0x04;
-    testCPU._regH = 0x05;
-    testCPU._regL = 0x06;
-
-    simpleMemory->write(INIT_VECTOR, {
-        Opcode::LD_A_A,
-        Opcode::LD_A_B,
-        Opcode::LD_A_C,
-        Opcode::LD_A_D,
-        Opcode::LD_A_E,
-        Opcode::LD_A_H,
-        Opcode::LD_A_L,
-    });
-
-    for (int i = 0; i < 7; i++) {
-        // All of these take 1 machine cycle
-        CLOCK(4);
-        CHECK(testCPU._regA == (uint8_t)i);
-        CHECK(testCPU._programCounter == INIT_VECTOR + i + 1);
-    }
-
-    REGISTER_STORAGE_TEST(B, 0);
-    REGISTER_STORAGE_TEST(C, 1);
-    REGISTER_STORAGE_TEST(D, 2);
-    REGISTER_STORAGE_TEST(E, 3);
-    REGISTER_STORAGE_TEST(H, 4);
-    REGISTER_STORAGE_TEST(L, 5);
+    REGISTER_STORAGE_TEST(A, 0);
+    REGISTER_STORAGE_TEST(B, 1);
+    REGISTER_STORAGE_TEST(C, 2);
+    REGISTER_STORAGE_TEST(D, 3);
+    REGISTER_STORAGE_TEST(E, 4);
+    REGISTER_STORAGE_TEST(H, 5);
+    REGISTER_STORAGE_TEST(L, 6);
 }
 
 TEST_CASE("load HL") {
@@ -278,4 +255,32 @@ TEST_CASE("load HL") {
     testCPU._regH = 0x00;
     CLOCK(8);
     CHECK(testCPU._regL == 0xAA);
+}
+
+TEST_CASE("store register to HL") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    const auto testAddress = 0x55aa;
+    simpleMemory->write(testAddress, 0xff);
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LD_aHL_A,
+        Opcode::LD_aHL_B,
+        Opcode::LD_aHL_C,
+        Opcode::LD_aHL_D,
+        Opcode::LD_aHL_E,
+    });
+
+    testCPU._regA = 0x00;
+    testCPU._regB = 0x01;
+    testCPU._regC = 0x02;
+    testCPU._regD = 0x03;
+    testCPU._regE = 0x04;
+
+    testCPU.regHL(testAddress);
+
+    for (int i = 0; i < 5; i++) {
+        CLOCK(8);
+        CHECK(simpleMemory->read(testAddress) == (uint8_t)i);
+    }
 }

@@ -58,36 +58,42 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::LD_A_E:
         case Opcode::LD_A_H:
         case Opcode::LD_A_L:
+        case Opcode::LD_B_A:
         case Opcode::LD_B_B:
         case Opcode::LD_B_C:
         case Opcode::LD_B_D:
         case Opcode::LD_B_E:
         case Opcode::LD_B_H:
         case Opcode::LD_B_L:
+        case Opcode::LD_C_A:
         case Opcode::LD_C_B:
         case Opcode::LD_C_C:
         case Opcode::LD_C_D:
         case Opcode::LD_C_E:
         case Opcode::LD_C_H:
         case Opcode::LD_C_L:
+        case Opcode::LD_D_A:
         case Opcode::LD_D_B:
         case Opcode::LD_D_C:
         case Opcode::LD_D_D:
         case Opcode::LD_D_E:
         case Opcode::LD_D_H:
         case Opcode::LD_D_L:
+        case Opcode::LD_E_A:
         case Opcode::LD_E_B:
         case Opcode::LD_E_C:
         case Opcode::LD_E_D:
         case Opcode::LD_E_E:
         case Opcode::LD_E_H:
         case Opcode::LD_E_L:
+        case Opcode::LD_H_A:
         case Opcode::LD_H_B:
         case Opcode::LD_H_C:
         case Opcode::LD_H_D:
         case Opcode::LD_H_E:
         case Opcode::LD_H_H:
         case Opcode::LD_H_L:
+        case Opcode::LD_L_A:
         case Opcode::LD_L_B:
         case Opcode::LD_L_C:
         case Opcode::LD_L_D:
@@ -103,6 +109,14 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::LD_H_aHL:
         case Opcode::LD_L_aHL:
             return I_LoadHLAddressIntoRegister(opcode);
+        case Opcode::LD_aHL_A:
+        case Opcode::LD_aHL_B:
+        case Opcode::LD_aHL_C:
+        case Opcode::LD_aHL_D:
+        case Opcode::LD_aHL_E:
+        case Opcode::LD_aHL_H:
+        case Opcode::LD_aHL_L:
+            return I_StoreRegisterToHLAddress(opcode);
     }
 }
 
@@ -130,14 +144,16 @@ int8_t CPU::I_TransferRegister(uint8_t opcode) {
         case Opcode::LD_A_E: _regA = _regE; break;
         case Opcode::LD_A_H: _regA = _regH; break;
         case Opcode::LD_A_L: _regA = _regL; break;
-        case Opcode::LD_B_B: _regB = _regB; break;
 
+        case Opcode::LD_B_A: _regB = _regA; break;
+        case Opcode::LD_B_B: _regB = _regB; break;
         case Opcode::LD_B_C: _regB = _regC; break;
         case Opcode::LD_B_D: _regB = _regD; break;
         case Opcode::LD_B_E: _regB = _regE; break;
         case Opcode::LD_B_H: _regB = _regH; break;
         case Opcode::LD_B_L: _regB = _regL; break;
 
+        case Opcode::LD_C_A: _regC = _regA; break;
         case Opcode::LD_C_B: _regC = _regB; break;
         case Opcode::LD_C_C: _regC = _regC; break;
         case Opcode::LD_C_D: _regC = _regD; break;
@@ -145,6 +161,7 @@ int8_t CPU::I_TransferRegister(uint8_t opcode) {
         case Opcode::LD_C_H: _regC = _regH; break;
         case Opcode::LD_C_L: _regC = _regL; break;
 
+        case Opcode::LD_D_A: _regD = _regA; break;
         case Opcode::LD_D_B: _regD = _regB; break;
         case Opcode::LD_D_C: _regD = _regC; break;
         case Opcode::LD_D_D: _regD = _regD; break;
@@ -152,6 +169,7 @@ int8_t CPU::I_TransferRegister(uint8_t opcode) {
         case Opcode::LD_D_H: _regD = _regH; break;
         case Opcode::LD_D_L: _regD = _regL; break;
 
+        case Opcode::LD_E_A: _regE = _regA; break;
         case Opcode::LD_E_B: _regE = _regB; break;
         case Opcode::LD_E_C: _regE = _regC; break;
         case Opcode::LD_E_D: _regE = _regD; break;
@@ -159,6 +177,7 @@ int8_t CPU::I_TransferRegister(uint8_t opcode) {
         case Opcode::LD_E_H: _regE = _regH; break;
         case Opcode::LD_E_L: _regE = _regL; break;
 
+        case Opcode::LD_H_A: _regH = _regA; break;
         case Opcode::LD_H_B: _regH = _regB; break;
         case Opcode::LD_H_C: _regH = _regC; break;
         case Opcode::LD_H_D: _regH = _regD; break;
@@ -166,6 +185,7 @@ int8_t CPU::I_TransferRegister(uint8_t opcode) {
         case Opcode::LD_H_H: _regH = _regH; break;
         case Opcode::LD_H_L: _regH = _regL; break;
 
+        case Opcode::LD_L_A: _regL = _regA; break;
         case Opcode::LD_L_B: _regL = _regB; break;
         case Opcode::LD_L_C: _regL = _regC; break;
         case Opcode::LD_L_D: _regL = _regD; break;
@@ -189,6 +209,23 @@ int8_t CPU::I_LoadHLAddressIntoRegister(uint8_t opcode) {
         case Opcode::LD_H_aHL: _regH = value; break;
         case Opcode::LD_L_aHL: _regL = value; break;
     }
+
+    return 2;
+}
+
+int8_t CPU::I_StoreRegisterToHLAddress(uint8_t opcode) {
+    uint8_t value = 0;
+    switch(opcode) {
+        case Opcode::LD_aHL_A: value = _regA; break;
+        case Opcode::LD_aHL_B: value = _regB; break;
+        case Opcode::LD_aHL_C: value = _regC; break;
+        case Opcode::LD_aHL_D: value = _regD; break;
+        case Opcode::LD_aHL_E: value = _regE; break;
+        case Opcode::LD_aHL_H: value = _regH; break;
+        case Opcode::LD_aHL_L: value = _regL; break;
+    }
+
+    _memory->write(regHL(), value);
 
     return 2;
 }
