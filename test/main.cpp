@@ -202,7 +202,7 @@ TEST_CASE("load immediate") {
         Opcode::LD_##reg##_E, \
         Opcode::LD_##reg##_H, \
         Opcode::LD_##reg##_L, \
-        }); \
+    }); \
     \
     for (int i = 0; i < 7; i++) { \
         /* All of these take 1 machine cycle */ \
