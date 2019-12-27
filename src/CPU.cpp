@@ -117,7 +117,8 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::LD_aHL_E:
         case Opcode::LD_aHL_H:
         case Opcode::LD_aHL_L:
-            return I_StoreRegisterToHLAddress(opcode);
+        case Opcode::LD_aHL_n:
+            return I_StoreToHLAddress(opcode);
     }
 }
 
@@ -138,13 +139,13 @@ int8_t CPU::I_LoadImmediate(uint8_t opcode) {
 }
 
 #define REG_TRANSFER_GROUP(reg) \
-        case Opcode::LD_##reg##_A: _reg##reg = _regA; break; \
-        case Opcode::LD_##reg##_B: _reg##reg = _regB; break; \
-        case Opcode::LD_##reg##_C: _reg##reg = _regC; break; \
-        case Opcode::LD_##reg##_D: _reg##reg = _regD; break; \
-        case Opcode::LD_##reg##_E: _reg##reg = _regE; break; \
-        case Opcode::LD_##reg##_H: _reg##reg = _regH; break; \
-        case Opcode::LD_##reg##_L: _reg##reg = _regL; break; \
+    case Opcode::LD_##reg##_A: _reg##reg = _regA; break; \
+    case Opcode::LD_##reg##_B: _reg##reg = _regB; break; \
+    case Opcode::LD_##reg##_C: _reg##reg = _regC; break; \
+    case Opcode::LD_##reg##_D: _reg##reg = _regD; break; \
+    case Opcode::LD_##reg##_E: _reg##reg = _regE; break; \
+    case Opcode::LD_##reg##_H: _reg##reg = _regH; break; \
+    case Opcode::LD_##reg##_L: _reg##reg = _regL; break; \
 
 int8_t CPU::I_TransferRegister(uint8_t opcode) {
     switch(opcode) {
@@ -176,7 +177,7 @@ int8_t CPU::I_LoadHLAddressIntoRegister(uint8_t opcode) {
     return 2;
 }
 
-int8_t CPU::I_StoreRegisterToHLAddress(uint8_t opcode) {
+int8_t CPU::I_StoreToHLAddress(uint8_t opcode) {
     uint8_t value = 0;
     switch(opcode) {
         case Opcode::LD_aHL_A: value = _regA; break;
@@ -186,9 +187,12 @@ int8_t CPU::I_StoreRegisterToHLAddress(uint8_t opcode) {
         case Opcode::LD_aHL_E: value = _regE; break;
         case Opcode::LD_aHL_H: value = _regH; break;
         case Opcode::LD_aHL_L: value = _regL; break;
+        case Opcode::LD_aHL_n:
+            value = _memory->read(_programCounter++);
+            break;
     }
 
     _memory->write(regHL(), value);
 
-    return 2;
+    return opcode == Opcode::LD_aHL_n ? 3 : 2;
 }

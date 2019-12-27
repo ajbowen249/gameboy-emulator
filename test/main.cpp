@@ -263,7 +263,7 @@ TEST_CASE("load HL") {
     CHECK(testCPU._regL == 0xAA);
 }
 
-TEST_CASE("store register to HL") {
+TEST_CASE("store register to HL address") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
     const auto testAddress = 0x55aa;
@@ -289,4 +289,22 @@ TEST_CASE("store register to HL") {
         CLOCK(8);
         CHECK(simpleMemory->read(testAddress) == (uint8_t)i);
     }
+}
+
+TEST_CASE("store literal to HL address") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    const auto testAddress = 0x55aa;
+    simpleMemory->write(testAddress, 0xff);
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LD_aHL_n,
+        0x12,
+    });
+
+    testCPU.regHL(testAddress);
+
+    CLOCK(12);
+
+    CHECK(simpleMemory->read(testAddress) == 0x12);
 }
