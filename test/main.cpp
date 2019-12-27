@@ -263,6 +263,36 @@ TEST_CASE("load HL") {
     CHECK(testCPU._regL == 0xAA);
 }
 
+TEST_CASE("load address to A") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(0x00, {
+        0x01,
+        0x02,
+        0x03,
+    });
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LD_A_aBC,
+        Opcode::LD_A_aDE,
+        Opcode::LD_A_aNN,
+        0x02,
+        0x00,
+    });
+
+    testCPU.regBC(0x0000);
+    testCPU.regDE(0x0001);
+
+    CLOCK(8);
+    CHECK(testCPU._regA == 0x01);
+
+    CLOCK(8);
+    CHECK(testCPU._regA == 0x02);
+
+    CLOCK(16);
+    CHECK(testCPU._regA == 0x03);
+}
+
 TEST_CASE("store register to HL address") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 

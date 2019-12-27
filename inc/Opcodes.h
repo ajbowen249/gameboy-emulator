@@ -78,6 +78,9 @@ enum Opcode : uint8_t {
     LD_E_aHL = 0x5E,
     LD_H_aHL = 0x66,
     LD_L_aHL = 0x6E,
+    LD_A_aBC = 0x0a,
+    LD_A_aDE = 0x1a,
+    LD_A_aNN = 0xfa,
 
     // "Load" Register->Address
     LD_aHL_A = 0x77,
