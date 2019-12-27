@@ -9,6 +9,9 @@
 #define INIT_STACK_POINTER 0xfffe
 #define CLOCK_CYCLES_PER_MACHINE_CYCLE 4
 
+#define TO_16(highByte, lowByte) \
+    ((uint16_t)highByte << 8) | (0x00ff & lowByte) \
+
 #define RET_COMBO_REGISTER(reg1, reg2) \
     return ((uint16_t)reg1 << 8) | (0x00ff & reg2) \
 
@@ -85,6 +88,7 @@ private:
     int8_t I_TransferRegister(uint8_t opcode);
     int8_t I_LoadAddressIntoRegister(uint8_t opcode);
     int8_t I_StoreToAddress(uint8_t opcode);
+    int8_t I_LoadImmediate16(uint8_t opcode);
 };
 
 #endif // __CPU_h_

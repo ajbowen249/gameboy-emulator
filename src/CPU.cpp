@@ -133,6 +133,11 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::LDI_aHL_A:
         case Opcode::LDH_afN_A:
             return I_StoreToAddress(opcode);
+        case Opcode::LD_BC_NN:
+        case Opcode::LD_DE_NN:
+        case Opcode::LD_HL_NN:
+        case Opcode::LD_SP_NN:
+            return I_LoadImmediate16(opcode);
     }
 }
 
@@ -195,7 +200,7 @@ int8_t CPU::I_LoadAddressIntoRegister(uint8_t opcode) {
         case Opcode::LD_A_aNN:
             const auto addrLow = _memory->read(_programCounter++);
             const auto addrHigh = _memory->read(_programCounter++);
-            _regA = _memory->read(((uint16_t)addrHigh << 8) | (0x00ff & addrLow));
+            _regA = _memory->read(TO_16(addrHigh, addrLow));
             return 4;
     }
 
@@ -242,7 +247,7 @@ int8_t CPU::I_StoreToAddress(uint8_t opcode) {
         case Opcode::LD_aNN_A:
             const auto addrLow = _memory->read(_programCounter++);
             const auto addrHigh = _memory->read(_programCounter++);
-            _memory->write(((uint16_t)addrHigh << 8) | (0x00ff & addrLow), _regA);
+            _memory->write(TO_16(addrHigh, addrLow), _regA);
             return 4;
     }
 
@@ -271,4 +276,19 @@ int8_t CPU::I_StoreToAddress(uint8_t opcode) {
     }
 
     return opcode == Opcode::LD_aHL_n ? 3 : 2;
+}
+
+int8_t CPU::I_LoadImmediate16(uint8_t opcode) {
+    const auto lowByte = _memory->read(_programCounter++);
+    const auto highByte = _memory->read(_programCounter++);
+    const auto fullValue = TO_16(highByte, lowByte);
+
+    switch(opcode) {
+        case Opcode::LD_BC_NN: regBC(fullValue); break;
+        case Opcode::LD_DE_NN: regDE(fullValue); break;
+        case Opcode::LD_HL_NN: regHL(fullValue); break;
+        case Opcode::LD_SP_NN: _stackPointer = fullValue; break;
+    }
+
+    return 3;
 }

@@ -104,6 +104,12 @@ enum Opcode : uint8_t {
 
     // "Load" Constant->Address
     LD_aHL_n = 0x36,
+
+    // 16-bit Immediate Assignment
+    LD_BC_NN = 0x01,
+    LD_DE_NN = 0x11,
+    LD_HL_NN = 0x21,
+    LD_SP_NN = 0x31,
 };
 
 #endif // __Opcodes_h__

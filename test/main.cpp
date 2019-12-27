@@ -549,3 +549,34 @@ TEST_CASE("store n + ff00") {
         CHECK(simpleMemory->read(0xff00 + (uint16_t)i) == 0xaa);
     }
 }
+
+TEST_CASE("load immediate 16-bit") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LD_BC_NN,
+        0x02,
+        0x01,
+        Opcode::LD_DE_NN,
+        0x04,
+        0x03,
+        Opcode::LD_HL_NN,
+        0x06,
+        0x05,
+        Opcode::LD_SP_NN,
+        0x08,
+        0x07,
+    });
+
+    testCPU.regBC(0x0000);
+    testCPU.regDE(0x0000);
+    testCPU.regHL(0x0000);
+    testCPU._stackPointer = 0x0000;
+
+    CLOCK(48);
+
+    CHECK(testCPU.regBC() == 0x0102);
+    CHECK(testCPU.regDE() == 0x0304);
+    CHECK(testCPU.regHL() == 0x0506);
+    CHECK(testCPU._stackPointer == 0x0708);
+}
