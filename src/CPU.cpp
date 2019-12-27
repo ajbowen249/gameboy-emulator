@@ -292,3 +292,21 @@ int8_t CPU::I_LoadImmediate16(uint8_t opcode) {
 
     return 3;
 }
+
+
+// NOT DONE YET
+// http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf
+// https://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html
+// https://stackoverflow.com/questions/41353869/length-of-instruction-ld-a-c-in-gameboy-z80-processor
+// https://stackoverflow.com/questions/5159603/gbz80-how-does-ld-hl-spe-affect-h-and-c-flags
+int8_t CPU::I_LoadHLWithSPN(uint8_t opcode) {
+    auto rawOffset = _memory->read(_programCounter++);
+    auto offset = *reinterpret_cast<int8_t*>(&rawOffset);
+    const auto effectiveAddress = _stackPointer + (int16_t)offset;
+    regHL(_memory->read(effectiveAddress));
+
+    zFlag(false);
+    nFlag(false);
+
+    return 3;
+}

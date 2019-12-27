@@ -89,6 +89,7 @@ private:
     int8_t I_LoadAddressIntoRegister(uint8_t opcode);
     int8_t I_StoreToAddress(uint8_t opcode);
     int8_t I_LoadImmediate16(uint8_t opcode);
+    int8_t I_LoadHLWithSPN(uint8_t opcode);
 };
 
 #endif // __CPU_h_

@@ -110,6 +110,9 @@ enum Opcode : uint8_t {
     LD_DE_NN = 0x11,
     LD_HL_NN = 0x21,
     LD_SP_NN = 0x31,
+
+    // Load HL with value at SP+n
+    LD_HL_aSPN = 0xf8,
 };
 
 #endif // __Opcodes_h__
