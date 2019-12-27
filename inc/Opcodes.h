@@ -82,6 +82,8 @@ enum Opcode : uint8_t {
     LD_A_aDE = 0x1a,
     LD_A_aNN = 0xfa,
     LD_A_afC = 0xf2,
+    LDD_A_aHL = 0x3a,
+    LDI_A_aHL = 0x2a,
 
     // "Load" Register->Address
     LD_aHL_A =  0x77,
@@ -95,8 +97,8 @@ enum Opcode : uint8_t {
     LD_aDE_A =  0x12,
     LD_aNN_A =  0xea,
     LD_afC_A =  0xe2,
-    LDD_A_aHL = 0x3a,
-    LDI_A_aHL = 0x2a,
+    LDD_aHL_A = 0x32,
+    LDI_aHL_A = 0x22,
 
     // "Load" Constant->Address
     LD_aHL_n = 0x36,

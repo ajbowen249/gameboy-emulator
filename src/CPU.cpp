@@ -128,6 +128,8 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::LD_aDE_A:
         case Opcode::LD_aNN_A:
         case Opcode::LD_afC_A:
+        case Opcode::LDD_aHL_A:
+        case Opcode::LDI_aHL_A:
             return I_StoreToAddress(opcode);
     }
 }
@@ -236,6 +238,8 @@ int8_t CPU::I_StoreToAddress(uint8_t opcode) {
 
     uint8_t value = 0;
     switch(opcode) {
+        case Opcode::LDD_aHL_A:
+        case Opcode::LDI_aHL_A:
         case Opcode::LD_aHL_A: value = _regA; break;
         case Opcode::LD_aHL_B: value = _regB; break;
         case Opcode::LD_aHL_C: value = _regC; break;
@@ -249,6 +253,12 @@ int8_t CPU::I_StoreToAddress(uint8_t opcode) {
     }
 
     _memory->write(regHL(), value);
+
+    if (opcode == Opcode::LDD_aHL_A) {
+        regHL(regHL() - 1);
+    } else if (opcode == Opcode::LDI_aHL_A) {
+        regHL(regHL() + 1);
+    }
 
     return opcode == Opcode::LD_aHL_n ? 3 : 2;
 }

@@ -455,3 +455,51 @@ TEST_CASE("incremental HL load") {
         CHECK(testCPU._regA == (uint8_t)i);
     }
 }
+
+TEST_CASE("decremental HL store") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(0x00, { 0xff, 0xff, 0xff, 0xff });
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LDD_aHL_A,
+        Opcode::LDD_aHL_A,
+        Opcode::LDD_aHL_A,
+        Opcode::LDD_aHL_A,
+    });
+
+    testCPU._regA = 0xaa;
+    testCPU.regHL(0x03);
+
+    CLOCK(32);
+
+    CHECK(testCPU.regHL() == 0xffff);
+
+    for (int i = 0; i < 4; i++) {
+        CHECK(simpleMemory->read((uint16_t)i) == 0xaa);
+    }
+}
+
+TEST_CASE("incremental HL store") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(0x00, { 0xff, 0xff, 0xff, 0xff });
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LDI_aHL_A,
+        Opcode::LDI_aHL_A,
+        Opcode::LDI_aHL_A,
+        Opcode::LDI_aHL_A,
+    });
+
+    testCPU._regA = 0xaa;
+    testCPU.regHL(0x00);
+
+    CLOCK(32);
+
+    CHECK(testCPU.regHL() == 0x04);
+
+    for (int i = 0; i < 4; i++) {
+        CHECK(simpleMemory->read((uint16_t)i) == 0xaa);
+    }
+}
