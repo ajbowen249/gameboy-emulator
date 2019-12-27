@@ -405,3 +405,53 @@ TEST_CASE("store A indirect via C") {
         CHECK(simpleMemory->read(0xff00 + (uint16_t)i) == (uint8_t)i);
     }
 }
+
+TEST_CASE("decremental HL load") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(0x00, {
+        0x03,
+        0x02,
+        0x01,
+        0x00,
+    });
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LDD_A_aHL,
+        Opcode::LDD_A_aHL,
+        Opcode::LDD_A_aHL,
+        Opcode::LDD_A_aHL,
+    });
+
+    testCPU.regHL(0x03);
+
+    for (int i = 0; i < 4; i++) {
+        CLOCK(8);
+        CHECK(testCPU._regA == (uint8_t)i);
+    }
+}
+
+TEST_CASE("incremental HL load") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(0x00, {
+        0x00,
+        0x01,
+        0x02,
+        0x03,
+    });
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LDI_A_aHL,
+        Opcode::LDI_A_aHL,
+        Opcode::LDI_A_aHL,
+        Opcode::LDI_A_aHL,
+    });
+
+    testCPU.regHL(0x00);
+
+    for (int i = 0; i < 4; i++) {
+        CLOCK(8);
+        CHECK(testCPU._regA == (uint8_t)i);
+    }
+}

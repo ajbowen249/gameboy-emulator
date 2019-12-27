@@ -113,6 +113,8 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::LD_A_aDE:
         case Opcode::LD_A_aNN:
         case Opcode::LD_A_afC:
+        case Opcode::LDD_A_aHL:
+        case Opcode::LDI_A_aHL:
             return I_LoadAddressIntoRegister(opcode);
         case Opcode::LD_aHL_A:
         case Opcode::LD_aHL_B:
@@ -191,7 +193,15 @@ int8_t CPU::I_LoadAddressIntoRegister(uint8_t opcode) {
 
     const auto value = _memory->read(regHL());
 
+    if (opcode == Opcode::LDD_A_aHL) {
+        regHL(regHL() - 1);
+    } else if (opcode == Opcode::LDI_A_aHL) {
+        regHL(regHL() + 1);
+    }
+
     switch(opcode) {
+        case Opcode::LDI_A_aHL:
+        case Opcode::LDD_A_aHL:
         case Opcode::LD_A_aHL: _regA = value; break;
         case Opcode::LD_B_aHL: _regB = value; break;
         case Opcode::LD_C_aHL: _regC = value; break;
