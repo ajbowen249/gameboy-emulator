@@ -12,4 +12,9 @@
     auto simpleMemory = std::make_shared<SimpleMemory>(); \
     CPU testCPU(simpleMemory); \
 
+#define CLOCK(cycles) \
+    for (int clock_cycle_iter = 0; clock_cycle_iter < cycles; clock_cycle_iter++) { \
+        testCPU.clock(); \
+    } \
+
 #endif // __TestMain_h__

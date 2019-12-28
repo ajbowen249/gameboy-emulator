@@ -1,3 +1,5 @@
+project(GameboyEmulator)
+
 cmake_minimum_required(VERSION 3.4.1)
 add_definitions(
     -std=gnu++11
@@ -11,6 +13,7 @@ add_executable(
     src/CPU.cpp
     src/main.cpp
     src/Log.cpp
+    src/Memory.cpp
 )
 
 target_include_directories(
@@ -26,6 +29,7 @@ add_executable(
     tests
     src/CPU.cpp
     src/Log.cpp
+    src/Memory.cpp
     test/main.cpp
     test/SimpleMemory.cpp
 )
