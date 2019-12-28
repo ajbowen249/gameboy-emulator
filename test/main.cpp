@@ -651,3 +651,38 @@ TEST_CASE("store stack pointer") {
     CHECK(simpleMemory->read(0x1122) == 0xaa); // Little-endian!
     CHECK(simpleMemory->read(0x1123) == 0x55);
 }
+
+TEST_CASE("push register") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    testCPU.regAF(0x0102);
+    testCPU.regBC(0x0304);
+    testCPU.regDE(0x0506);
+    testCPU.regHL(0x0708);
+
+    simpleMemory->write(INIT_STACK_POINTER - 6, {
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+        0x00,
+    });
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PUSH_AF,
+        Opcode::PUSH_BC,
+        Opcode::PUSH_DE,
+        Opcode::PUSH_HL,
+    });
+
+    CLOCK(64);
+
+    CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 8);
+    CHECK(simpleMemory->readLI(INIT_STACK_POINTER) == 0x0102);
+    CHECK(simpleMemory->readLI(INIT_STACK_POINTER - 2) == 0x0304);
+    CHECK(simpleMemory->readLI(INIT_STACK_POINTER - 4) == 0x0506);
+    CHECK(simpleMemory->readLI(INIT_STACK_POINTER - 6) == 0x0708);
+}

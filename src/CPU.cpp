@@ -144,6 +144,11 @@ int8_t CPU::decodeAndExecute() {
             return I_LoadHLWithSPN();
         case Opcode::LD_aNN_SP:
             return I_StoreStackPointer();
+        case Opcode::PUSH_AF:
+        case Opcode::PUSH_BC:
+        case Opcode::PUSH_DE:
+        case Opcode::PUSH_HL:
+            return I_PushRegister(opcode);
     }
 }
 
@@ -333,4 +338,20 @@ int8_t CPU::I_StoreStackPointer() {
     _memory->writeLI(address, _stackPointer);
 
     return 5;
+}
+
+int8_t CPU::I_PushRegister(uint8_t opcode) {
+    uint16_t value = 0;
+    switch (opcode) {
+        case Opcode::PUSH_AF: value = regAF(); break;
+        case Opcode::PUSH_BC: value = regBC(); break;
+        case Opcode::PUSH_DE: value = regDE(); break;
+        case Opcode::PUSH_HL: value = regHL(); break;
+    }
+
+    _memory->writeLI(_stackPointer, value);
+
+    _stackPointer -= 2;
+
+    return 4;
 }

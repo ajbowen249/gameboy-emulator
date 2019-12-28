@@ -118,6 +118,12 @@ enum Opcode : uint8_t {
 
     // Store to address NN the stack pointer
     LD_aNN_SP = 0x08,
+
+    // Push
+    PUSH_AF = 0xf5,
+    PUSH_BC = 0xc5,
+    PUSH_DE = 0xd5,
+    PUSH_HL = 0xe5,
 };
 
 #endif // __Opcodes_h__
