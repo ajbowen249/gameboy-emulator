@@ -138,6 +138,8 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::LD_HL_NN:
         case Opcode::LD_SP_NN:
             return I_LoadImmediate16(opcode);
+        case Opcode::LD_HL_aSPN:
+            return I_LoadHLWithSPN(opcode);
     }
 }
 
@@ -293,20 +295,27 @@ int8_t CPU::I_LoadImmediate16(uint8_t opcode) {
     return 3;
 }
 
-
-// NOT DONE YET
-// http://marc.rawer.de/Gameboy/Docs/GBCPUman.pdf
-// https://www.pastraiser.com/cpu/gameboy/gameboy_opcodes.html
-// https://stackoverflow.com/questions/41353869/length-of-instruction-ld-a-c-in-gameboy-z80-processor
-// https://stackoverflow.com/questions/5159603/gbz80-how-does-ld-hl-spe-affect-h-and-c-flags
 int8_t CPU::I_LoadHLWithSPN(uint8_t opcode) {
     auto rawOffset = _memory->read(_programCounter++);
     auto offset = *reinterpret_cast<int8_t*>(&rawOffset);
     const auto effectiveAddress = _stackPointer + (int16_t)offset;
-    regHL(_memory->read(effectiveAddress));
+    // Little-endian load
+    _regL = _memory->read(effectiveAddress);
+    _regH = _memory->read(effectiveAddress + 1);
 
     zFlag(false);
     nFlag(false);
+
+    // Flag logic lifted from here:
+    // https://stackoverflow.com/questions/5159603/gbz80-how-does-ld-hl-spe-affect-h-and-c-flags
+    // Official documentation is pretty light on the topic.
+    if (offset > 0) {
+        cFlag(((_stackPointer & 0xff) + offset) > 0xff);
+        hFlag(((_stackPointer & 0xf) + (offset & 0xf)) > 0xf);
+    } else {
+        cFlag((_stackPointer & 0xff) <= (_stackPointer & 0xff));
+        hFlag((_stackPointer & 0xf) <= (_stackPointer & 0xf));
+    }
 
     return 3;
 }

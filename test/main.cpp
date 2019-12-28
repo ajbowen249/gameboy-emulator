@@ -580,3 +580,40 @@ TEST_CASE("load immediate 16-bit") {
     CHECK(testCPU.regHL() == 0x0506);
     CHECK(testCPU._stackPointer == 0x0708);
 }
+
+TEST_CASE("load HL with value from stack pointer + n") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    // NOTE: Documentation on how flags work for this instruction is rough.
+    //       Flag logic assumes reference on StackOverflow is correct.
+
+    // 16-bit loads will get these little-endian.
+    simpleMemory->write(0x00, { 0x00, 0x01, 0x02, 0x03, 0x04 });
+
+    int8_t offsetMinus1 = -1;
+    uint8_t rawOffsetMinus1 = *reinterpret_cast<uint8_t*>(&offsetMinus1);
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LD_HL_aSPN,
+        0x01,
+        Opcode::LD_HL_aSPN,
+        rawOffsetMinus1,
+    });
+
+    // Part 1: SP + 1
+    testCPU._stackPointer = 0x0001;
+    testCPU.regHL(0x0000);
+    CLOCK(12);
+    CHECK(testCPU.regHL() == 0x0302);
+    CHECK(testCPU._flags == 0x00);
+
+    // Part 2: SP - 1
+    testCPU._stackPointer = 0x0001;
+    testCPU.regHL(0x0000);
+    CLOCK(12);
+    CHECK(testCPU.regHL() == 0x0100);
+    CHECK(testCPU.zFlag() == false);
+    CHECK(testCPU.nFlag() == false);
+    CHECK(testCPU.hFlag() == true);
+    CHECK(testCPU.cFlag() == true);
+}
