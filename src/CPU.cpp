@@ -101,6 +101,7 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::LD_L_E:
         case Opcode::LD_L_H:
         case Opcode::LD_L_L:
+        case Opcode::LD_HL_SP:
             return I_TransferRegister(opcode);
         case Opcode::LD_A_aHL:
         case Opcode::LD_B_aHL:
@@ -177,6 +178,9 @@ int8_t CPU::I_TransferRegister(uint8_t opcode) {
         REG_TRANSFER_GROUP(E);
         REG_TRANSFER_GROUP(H);
         REG_TRANSFER_GROUP(L);
+        case Opcode::LD_HL_SP:
+            _stackPointer = regHL();
+            return 2;
     }
 
     return 1;

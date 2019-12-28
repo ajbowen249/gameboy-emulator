@@ -225,6 +225,20 @@ TEST_CASE("transfer register") {
     REGISTER_STORAGE_TEST(L, 6);
 }
 
+TEST_CASE("transfter HL to SP") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LD_HL_SP,
+    });
+
+    testCPU._stackPointer = 0x0000;
+    testCPU.regHL(0x1234);
+
+    CLOCK(8);
+    CHECK(testCPU._stackPointer == 0x1234);
+}
+
 TEST_CASE("load HL") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 

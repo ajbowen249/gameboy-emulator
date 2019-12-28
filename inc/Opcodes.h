@@ -70,6 +70,8 @@ enum Opcode : uint8_t {
     LD_L_H = 0x6c,
     LD_L_L = 0x6d,
 
+    LD_HL_SP = 0xf9,
+
     // Load Address->Register
     LD_A_aHL =   0x7e,
     LD_B_aHL =   0x46,
@@ -113,6 +115,9 @@ enum Opcode : uint8_t {
 
     // Load HL with value at SP+n
     LD_HL_aSPN = 0xf8,
+
+    // Store to address NN the stack pointer
+    LD_aNN_SP = 0x08,
 };
 
 #endif // __Opcodes_h__
