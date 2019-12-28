@@ -154,6 +154,16 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::POP_DE:
         case Opcode::POP_HL:
             return I_PopRegister(opcode);
+        case Opcode::ADD_A_A:
+        case Opcode::ADD_A_B:
+        case Opcode::ADD_A_C:
+        case Opcode::ADD_A_D:
+        case Opcode::ADD_A_E:
+        case Opcode::ADD_A_H:
+        case Opcode::ADD_A_L:
+        case Opcode::ADD_A_aHL:
+        case Opcode::ADD_A_N:
+            return I_8BitAdd(opcode);
     }
 }
 
@@ -373,4 +383,38 @@ int8_t CPU::I_PopRegister(uint8_t opcode) {
     }
 
     return 3;
+}
+
+int8_t CPU::I_8BitAdd(uint8_t opcode) {
+    uint8_t operand = 0;
+    int8_t cycles = 1;
+
+    switch(opcode) {
+        case Opcode::ADD_A_A: operand = _regA; break;
+        case Opcode::ADD_A_B: operand = _regB; break;
+        case Opcode::ADD_A_C: operand = _regC; break;
+        case Opcode::ADD_A_D: operand = _regD; break;
+        case Opcode::ADD_A_E: operand = _regE; break;
+        case Opcode::ADD_A_H: operand = _regH; break;
+        case Opcode::ADD_A_L: operand = _regL; break;
+        case Opcode::ADD_A_aHL:
+            operand = _memory->read(regHL());
+            cycles = 2;
+            break;
+        case Opcode::ADD_A_N:
+            operand = _memory->read(_programCounter++);
+            cycles = 2;
+            break;
+    }
+
+    const uint8_t result = _regA + operand;
+
+    zFlag(result == 0);
+    nFlag(false);
+    hFlag((((_regA & 0xf) + (operand & 0xf)) & 0x10) != 0);
+    cFlag(result < _regA || result < operand);
+
+    _regA = result;
+    
+    return cycles;
 }

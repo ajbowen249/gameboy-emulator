@@ -759,3 +759,87 @@ TEST_CASE("push/pop") {
     CHECK(testCPU.hFlag() == false);
     CHECK(testCPU.nFlag() == false);
 }
+
+TEST_CASE("add") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::ADD_A_A,
+        Opcode::ADD_A_B,
+        Opcode::ADD_A_C,
+        Opcode::ADD_A_D,
+        Opcode::ADD_A_E,
+        Opcode::ADD_A_H,
+        Opcode::ADD_A_L,
+        Opcode::ADD_A_aHL,
+        Opcode::ADD_A_N,
+        0x09,
+    });
+
+    testCPU._regA = 1;
+    testCPU._regB = 2;
+    testCPU._regC = 3;
+    testCPU._regD = 4;
+    testCPU._regE = 5;
+    testCPU._regH = 6;
+    testCPU._regL = 7;
+    simpleMemory->write(0x0607, 0x08);
+
+    CLOCK(44);
+
+    CHECK(testCPU._regA == (uint8_t)46);
+}
+
+TEST_CASE("add and check flags") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::ADD_A_A,
+        Opcode::ADD_A_B,
+        Opcode::ADD_A_B,
+        Opcode::ADD_A_B,
+    });
+
+    // Part 1 - Zero Flag
+    testCPU._regA = 0;
+    CLOCK(4);
+
+    CHECK(testCPU._regA == 0);
+    CHECK(testCPU.zFlag() == true);
+    CHECK(testCPU.nFlag() == false);
+    CHECK(testCPU.hFlag() == false);
+    CHECK(testCPU.cFlag() == false);
+
+    // Part 2 - Half-Carry Flag
+    testCPU._regA = 0x0f;
+    testCPU._regB = 0x01;
+    CLOCK(4);
+
+    CHECK(testCPU._regA == 0x10);
+    CHECK(testCPU.zFlag() == false);
+    CHECK(testCPU.nFlag() == false);
+    CHECK(testCPU.hFlag() == true);
+    CHECK(testCPU.cFlag() == false);
+
+    // Part 3 - Carry Flag (1)
+    testCPU._regA = 0xff;
+    testCPU._regB = 0x01;
+    CLOCK(4);
+
+    CHECK(testCPU._regA == 0x00);
+    CHECK(testCPU.zFlag() == true);
+    CHECK(testCPU.nFlag() == false);
+    CHECK(testCPU.hFlag() == true);
+    CHECK(testCPU.cFlag() == true);
+
+    // Part 3 - Carry Flag (2)
+    testCPU._regA = 0xff;
+    testCPU._regB = 0x02;
+    CLOCK(4);
+
+    CHECK(testCPU._regA == 0x01);
+    CHECK(testCPU.zFlag() == false);
+    CHECK(testCPU.nFlag() == false);
+    CHECK(testCPU.hFlag() == true);
+    CHECK(testCPU.cFlag() == true);
+}

@@ -130,6 +130,17 @@ enum Opcode : uint8_t {
     POP_BC = 0xc1,
     POP_DE = 0xd1,
     POP_HL = 0xe1,
+
+    // 8-bit ADD
+    ADD_A_A =   0x87,
+    ADD_A_B =   0x80,
+    ADD_A_C =   0x81,
+    ADD_A_D =   0x82,
+    ADD_A_E =   0x83,
+    ADD_A_H =   0x84,
+    ADD_A_L =   0x85,
+    ADD_A_aHL = 0x86,
+    ADD_A_N  =  0xc6,
 };
 
 #endif // __Opcodes_h__
