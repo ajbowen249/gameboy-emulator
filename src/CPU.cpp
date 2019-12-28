@@ -149,6 +149,11 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::PUSH_DE:
         case Opcode::PUSH_HL:
             return I_PushRegister(opcode);
+        case Opcode::POP_AF:
+        case Opcode::POP_BC:
+        case Opcode::POP_DE:
+        case Opcode::POP_HL:
+            return I_PopRegister(opcode);
     }
 }
 
@@ -349,9 +354,23 @@ int8_t CPU::I_PushRegister(uint8_t opcode) {
         case Opcode::PUSH_HL: value = regHL(); break;
     }
 
-    _memory->writeLI(_stackPointer, value);
-
     _stackPointer -= 2;
 
+    _memory->writeLI(_stackPointer, value);
+
     return 4;
+}
+
+int8_t CPU::I_PopRegister(uint8_t opcode) {
+    uint16_t value = _memory->readLI(_stackPointer);
+    _stackPointer += 2;
+
+    switch (opcode) {
+        case Opcode::POP_AF: regAF(value); break;
+        case Opcode::POP_BC: regBC(value); break;
+        case Opcode::POP_DE: regDE(value); break;
+        case Opcode::POP_HL: regHL(value); break;
+    }
+
+    return 3;
 }

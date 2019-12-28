@@ -124,6 +124,12 @@ enum Opcode : uint8_t {
     PUSH_BC = 0xc5,
     PUSH_DE = 0xd5,
     PUSH_HL = 0xe5,
+
+    // Pop
+    POP_AF = 0xf1,
+    POP_BC = 0xc1,
+    POP_DE = 0xd1,
+    POP_HL = 0xe1,
 };
 
 #endif // __Opcodes_h__

@@ -44,7 +44,6 @@ public:
     uint8_t _regC;
     uint8_t _regD;
     uint8_t _regE;
-    uint8_t _regF;
     uint8_t _regH;
     uint8_t _regL;
 
@@ -53,12 +52,12 @@ public:
 
     uint8_t _flags;
 
-    inline uint16_t regAF() const { RET_COMBO_REGISTER(_regA, _regF); }
+    inline uint16_t regAF() const { RET_COMBO_REGISTER(_regA, _flags); }
     inline uint16_t regBC() const { RET_COMBO_REGISTER(_regB, _regC); }
     inline uint16_t regDE() const { RET_COMBO_REGISTER(_regD, _regE); }
     inline uint16_t regHL() const { RET_COMBO_REGISTER(_regH, _regL); }
 
-    inline void regAF(uint16_t value) { SET_COMBO_REGISTER(_regA, _regF); }
+    inline void regAF(uint16_t value) { SET_COMBO_REGISTER(_regA, _flags); }
     inline void regBC(uint16_t value) { SET_COMBO_REGISTER(_regB, _regC); }
     inline void regDE(uint16_t value) { SET_COMBO_REGISTER(_regD, _regE); }
     inline void regHL(uint16_t value) { SET_COMBO_REGISTER(_regH, _regL); }
@@ -92,6 +91,7 @@ private:
     int8_t I_LoadHLWithSPN();
     int8_t I_StoreStackPointer();
     int8_t I_PushRegister(uint8_t opcode);
+    int8_t I_PopRegister(uint8_t opcode);
 };
 
 #endif // __CPU_h_

@@ -681,8 +681,81 @@ TEST_CASE("push register") {
     CLOCK(64);
 
     CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 8);
-    CHECK(simpleMemory->readLI(INIT_STACK_POINTER) == 0x0102);
-    CHECK(simpleMemory->readLI(INIT_STACK_POINTER - 2) == 0x0304);
-    CHECK(simpleMemory->readLI(INIT_STACK_POINTER - 4) == 0x0506);
-    CHECK(simpleMemory->readLI(INIT_STACK_POINTER - 6) == 0x0708);
+    CHECK(simpleMemory->readLI(INIT_STACK_POINTER - 2) == 0x0102);
+    CHECK(simpleMemory->readLI(INIT_STACK_POINTER - 4) == 0x0304);
+    CHECK(simpleMemory->readLI(INIT_STACK_POINTER - 6) == 0x0506);
+    CHECK(simpleMemory->readLI(INIT_STACK_POINTER - 8) == 0x0708);
+}
+
+TEST_CASE("pop register") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_STACK_POINTER - 8, {
+        0x08,
+        0x07,
+        0x06,
+        0x05,
+        0x04,
+        0x03,
+        0x02,
+        0x01,
+    });
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::POP_HL,
+        Opcode::POP_DE,
+        Opcode::POP_BC,
+        Opcode::POP_AF,
+    });
+
+    testCPU.regAF(0x0000);
+    testCPU.regBC(0x0000);
+    testCPU.regDE(0x0000);
+    testCPU.regHL(0x0000);
+
+    testCPU._stackPointer = INIT_STACK_POINTER - 8;
+
+    CLOCK(48);
+
+    CHECK(testCPU._stackPointer == INIT_STACK_POINTER);
+    CHECK(testCPU.regAF() == 0x0102);
+    CHECK(testCPU.regBC() == 0x0304);
+    CHECK(testCPU.regDE() == 0x0506);
+    CHECK(testCPU.regHL() == 0x0708);
+}
+
+TEST_CASE("push/pop") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    // arbitrary value
+    testCPU.regBC(0x1234);
+
+    // Accumulator and flags
+    testCPU._regA = 0xff;
+    testCPU._flags = 0x00;
+    testCPU.zFlag(true);
+    testCPU.cFlag(true);
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PUSH_BC,
+        Opcode::PUSH_AF,
+        Opcode::POP_AF,
+        Opcode::POP_BC,
+    });
+
+    CLOCK(32);
+
+    // Values should be saved, so wipe them out on the CPU
+    testCPU.regBC(0x0000);
+    testCPU._regA = 0x00;
+    testCPU._flags = 0x00;
+
+    CLOCK(24);
+
+    CHECK(testCPU.regBC() == 0x1234);
+    CHECK(testCPU._regA == 0xff);
+    CHECK(testCPU.zFlag() == true);
+    CHECK(testCPU.cFlag() == true);
+    CHECK(testCPU.hFlag() == false);
+    CHECK(testCPU.nFlag() == false);
 }
