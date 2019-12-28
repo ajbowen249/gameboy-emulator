@@ -631,3 +631,23 @@ TEST_CASE("load HL with value from stack pointer + n") {
     CHECK(testCPU.hFlag() == true);
     CHECK(testCPU.cFlag() == true);
 }
+
+TEST_CASE("store stack pointer") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    testCPU._stackPointer = 0x55aa;
+
+    simpleMemory->write(0x1122, 0x00);
+    simpleMemory->write(0x1123, 0x00);
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LD_aNN_SP,
+        0x22, // Little-endian!
+        0x11,
+    });
+
+    CLOCK(20);
+
+    CHECK(simpleMemory->read(0x1122) == 0xaa); // Little-endian!
+    CHECK(simpleMemory->read(0x1123) == 0x55);
+}

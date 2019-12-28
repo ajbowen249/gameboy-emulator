@@ -2,6 +2,7 @@
 
 #include "Log.h"
 #include "Opcodes.h"
+#include "Util.h"
 
 #include <sstream>
 
@@ -140,7 +141,9 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::LD_SP_NN:
             return I_LoadImmediate16(opcode);
         case Opcode::LD_HL_aSPN:
-            return I_LoadHLWithSPN(opcode);
+            return I_LoadHLWithSPN();
+        case Opcode::LD_aNN_SP:
+            return I_StoreStackPointer();
     }
 }
 
@@ -204,9 +207,9 @@ int8_t CPU::I_LoadAddressIntoRegister(uint8_t opcode) {
             _regA = _memory->read(regDE());
             return 2;
         case Opcode::LD_A_aNN:
-            const auto addrLow = _memory->read(_programCounter++);
-            const auto addrHigh = _memory->read(_programCounter++);
-            _regA = _memory->read(TO_16(addrHigh, addrLow));
+            const auto addr = _memory->readLI(_programCounter);
+            _programCounter += 2;
+            _regA = _memory->read(addr);
             return 4;
     }
 
@@ -251,9 +254,9 @@ int8_t CPU::I_StoreToAddress(uint8_t opcode) {
             _memory->write(regDE(), _regA);
             return 2;
         case Opcode::LD_aNN_A:
-            const auto addrLow = _memory->read(_programCounter++);
-            const auto addrHigh = _memory->read(_programCounter++);
-            _memory->write(TO_16(addrHigh, addrLow), _regA);
+            const auto addr = _memory->readLI(_programCounter);
+            _programCounter += 2;
+            _memory->write(addr, _regA);
             return 4;
     }
 
@@ -285,21 +288,20 @@ int8_t CPU::I_StoreToAddress(uint8_t opcode) {
 }
 
 int8_t CPU::I_LoadImmediate16(uint8_t opcode) {
-    const auto lowByte = _memory->read(_programCounter++);
-    const auto highByte = _memory->read(_programCounter++);
-    const auto fullValue = TO_16(highByte, lowByte);
+    const auto value = _memory->readLI(_programCounter);
+    _programCounter += 2;
 
     switch(opcode) {
-        case Opcode::LD_BC_NN: regBC(fullValue); break;
-        case Opcode::LD_DE_NN: regDE(fullValue); break;
-        case Opcode::LD_HL_NN: regHL(fullValue); break;
-        case Opcode::LD_SP_NN: _stackPointer = fullValue; break;
+        case Opcode::LD_BC_NN: regBC(value); break;
+        case Opcode::LD_DE_NN: regDE(value); break;
+        case Opcode::LD_HL_NN: regHL(value); break;
+        case Opcode::LD_SP_NN: _stackPointer = value; break;
     }
 
     return 3;
 }
 
-int8_t CPU::I_LoadHLWithSPN(uint8_t opcode) {
+int8_t CPU::I_LoadHLWithSPN() {
     auto rawOffset = _memory->read(_programCounter++);
     auto offset = *reinterpret_cast<int8_t*>(&rawOffset);
     const auto effectiveAddress = _stackPointer + (int16_t)offset;
@@ -322,4 +324,13 @@ int8_t CPU::I_LoadHLWithSPN(uint8_t opcode) {
     }
 
     return 3;
+}
+
+int8_t CPU::I_StoreStackPointer() {
+    const auto address = _memory->readLI(_programCounter);
+    _programCounter += 2;
+
+    _memory->writeLI(address, _stackPointer);
+
+    return 5;
 }
