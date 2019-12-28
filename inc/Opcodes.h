@@ -131,7 +131,7 @@ enum Opcode : uint8_t {
     POP_DE = 0xd1,
     POP_HL = 0xe1,
 
-    // 8-bit ADD
+    // 8-bit Add
     ADD_A_A =   0x87,
     ADD_A_B =   0x80,
     ADD_A_C =   0x81,
@@ -141,6 +141,17 @@ enum Opcode : uint8_t {
     ADD_A_L =   0x85,
     ADD_A_aHL = 0x86,
     ADD_A_N  =  0xc6,
+
+    // 8-bit Add with Carry
+    ADC_A_A =   0x8f,
+    ADC_A_B =   0x88,
+    ADC_A_C =   0x89,
+    ADC_A_D =   0x8a,
+    ADC_A_E =   0x8b,
+    ADC_A_H =   0x8c,
+    ADC_A_L =   0x8d,
+    ADC_A_aHL = 0x8e,
+    ADC_A_N =   0xce,
 };
 
 #endif // __Opcodes_h__

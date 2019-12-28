@@ -843,3 +843,23 @@ TEST_CASE("add and check flags") {
     CHECK(testCPU.hFlag() == true);
     CHECK(testCPU.cFlag() == true);
 }
+
+TEST_CASE("add with carry") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::ADD_A_B,
+        Opcode::ADC_A_C,
+        Opcode::ADC_A_D,
+    });
+
+    testCPU._regA = 0xff;
+    testCPU._regB = 0x02; // Cause a carry, 0xff -> 0x01
+    testCPU._regC = 0x01; // 0x01 + 0x01 + carry
+    testCPU._regD = 0x01; // Carry will be clear by now, so 0x03 + 0x01 + 0
+
+    CLOCK(8);
+    CHECK(testCPU._regA == 0x03);
+    CLOCK(4);
+    CHECK(testCPU._regA == 0x04);
+}

@@ -163,6 +163,15 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::ADD_A_L:
         case Opcode::ADD_A_aHL:
         case Opcode::ADD_A_N:
+        case Opcode::ADC_A_A:
+        case Opcode::ADC_A_B:
+        case Opcode::ADC_A_C:
+        case Opcode::ADC_A_D:
+        case Opcode::ADC_A_E:
+        case Opcode::ADC_A_H:
+        case Opcode::ADC_A_L:
+        case Opcode::ADC_A_aHL:
+        case Opcode::ADC_A_N:
             return I_8BitAdd(opcode);
     }
 }
@@ -390,21 +399,26 @@ int8_t CPU::I_8BitAdd(uint8_t opcode) {
     int8_t cycles = 1;
 
     switch(opcode) {
-        case Opcode::ADD_A_A: operand = _regA; break;
-        case Opcode::ADD_A_B: operand = _regB; break;
-        case Opcode::ADD_A_C: operand = _regC; break;
-        case Opcode::ADD_A_D: operand = _regD; break;
-        case Opcode::ADD_A_E: operand = _regE; break;
-        case Opcode::ADD_A_H: operand = _regH; break;
-        case Opcode::ADD_A_L: operand = _regL; break;
-        case Opcode::ADD_A_aHL:
+        case Opcode::ADD_A_A: case Opcode::ADC_A_A: operand = _regA; break;
+        case Opcode::ADD_A_B: case Opcode::ADC_A_B: operand = _regB; break;
+        case Opcode::ADD_A_C: case Opcode::ADC_A_C: operand = _regC; break;
+        case Opcode::ADD_A_D: case Opcode::ADC_A_D: operand = _regD; break;
+        case Opcode::ADD_A_E: case Opcode::ADC_A_E: operand = _regE; break;
+        case Opcode::ADD_A_H: case Opcode::ADC_A_H: operand = _regH; break;
+        case Opcode::ADD_A_L: case Opcode::ADC_A_L: operand = _regL; break;
+        case Opcode::ADD_A_aHL: case Opcode::ADC_A_aHL:
             operand = _memory->read(regHL());
             cycles = 2;
             break;
-        case Opcode::ADD_A_N:
+        case Opcode::ADD_A_N: case Opcode::ADC_A_N:
             operand = _memory->read(_programCounter++);
             cycles = 2;
             break;
+    }
+
+    // All ADC instructions are at or above 0x08 in their row.
+    if (((opcode & 0x0f) >= 0x08) && cFlag()) {
+        operand++;
     }
 
     const uint8_t result = _regA + operand;
