@@ -198,15 +198,26 @@ enum Opcode : uint8_t {
     OR_N =   0xf6,
 
     // Logical XOR
-    XOR_A =   0xAF,
-    XOR_B =   0xA8,
-    XOR_C =   0xA9,
-    XOR_D =   0xAA,
-    XOR_E =   0xAB,
-    XOR_H =   0xAC,
-    XOR_L =   0xAD,
-    XOR_aHL = 0xAE,
-    XOR_N =   0xEE,
+    XOR_A =   0xaf,
+    XOR_B =   0xa8,
+    XOR_C =   0xa9,
+    XOR_D =   0xaa,
+    XOR_E =   0xab,
+    XOR_H =   0xac,
+    XOR_L =   0xad,
+    XOR_aHL = 0xae,
+    XOR_N =   0xee,
+
+    // Subtract, but don't store results, just set flags.
+    CP_A =   0xbf,
+    CP_B =   0xb8,
+    CP_C =   0xb9,
+    CP_D =   0xba,
+    CP_E =   0xbb,
+    CP_H =   0xbc,
+    CP_L =   0xbd,
+    CP_aHL = 0xbe,
+    CP_N =   0xfe,
 };
 
 #endif // __Opcodes_h__

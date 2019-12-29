@@ -222,6 +222,16 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::XOR_aHL:
         case Opcode::XOR_N:
             return I_Xor(opcode);
+        case Opcode::CP_A:
+        case Opcode::CP_B:
+        case Opcode::CP_C:
+        case Opcode::CP_D:
+        case Opcode::CP_E:
+        case Opcode::CP_H:
+        case Opcode::CP_L:
+        case Opcode::CP_aHL:
+        case Opcode::CP_N:
+            return I_Compare(opcode);
     }
 }
 
@@ -580,6 +590,19 @@ int8_t CPU::I_Xor(uint8_t opcode) {
     nFlag(false);
     hFlag(false);
     cFlag(false);
+
+    return cycles;
+}
+
+int8_t CPU::I_Compare(uint8_t opcode) {
+    DECODE_LOGICAL_OPERAND(CP);
+
+    const uint8_t result = _regA - operand;
+
+    zFlag(result == 0);
+    nFlag(true);
+    hFlag(((_regA & 0x0f) - (operand & 0x0f)) < 0);
+    cFlag(result > _regA || result > operand);
 
     return cycles;
 }
