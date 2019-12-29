@@ -152,6 +152,28 @@ enum Opcode : uint8_t {
     ADC_A_L =   0x8d,
     ADC_A_aHL = 0x8e,
     ADC_A_N =   0xce,
+
+    // 8-bit Subtract
+    SUB_A =   0x97,
+    SUB_B =   0x90,
+    SUB_C =   0x91,
+    SUB_D =   0x92,
+    SUB_E =   0x93,
+    SUB_H =   0x94,
+    SUB_L =   0x95,
+    SUB_aHL = 0x96,
+    SUB_N =   0xd6,
+
+    // 8-bit Subtract with Carry
+    SBC_A_A =   0x9f,
+    SBC_A_B =   0x98,
+    SBC_A_C =   0x99,
+    SBC_A_D =   0x9a,
+    SBC_A_E =   0x9b,
+    SBC_A_H =   0x9c,
+    SBC_A_L =   0x9d,
+    SBC_A_aHL = 0x9e,
+    SBC_A_N =   0xde,
 };
 
 #endif // __Opcodes_h__

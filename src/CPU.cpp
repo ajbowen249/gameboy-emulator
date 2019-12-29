@@ -173,6 +173,16 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::ADC_A_aHL:
         case Opcode::ADC_A_N:
             return I_8BitAdd(opcode);
+        case Opcode::SUB_A:
+        case Opcode::SUB_B:
+        case Opcode::SUB_C:
+        case Opcode::SUB_D:
+        case Opcode::SUB_E:
+        case Opcode::SUB_H:
+        case Opcode::SUB_L:
+        case Opcode::SUB_aHL:
+        case Opcode::SUB_N:
+            return I_8BitSubtract(opcode);
     }
 }
 
@@ -429,6 +439,47 @@ int8_t CPU::I_8BitAdd(uint8_t opcode) {
     cFlag(result < _regA || result < operand);
 
     _regA = result;
-    
+
+    return cycles;
+}
+
+int8_t CPU::I_8BitSubtract(uint8_t opcode) {
+    uint8_t operand = 0;
+    int8_t cycles = 1;
+
+    switch(opcode) {
+        case Opcode::SUB_A: case Opcode::SBC_A_A: operand = _regA; break;
+        case Opcode::SUB_B: case Opcode::SBC_A_B: operand = _regB; break;
+        case Opcode::SUB_C: case Opcode::SBC_A_C: operand = _regC; break;
+        case Opcode::SUB_D: case Opcode::SBC_A_D: operand = _regD; break;
+        case Opcode::SUB_E: case Opcode::SBC_A_E: operand = _regE; break;
+        case Opcode::SUB_H: case Opcode::SBC_A_H: operand = _regH; break;
+        case Opcode::SUB_L: case Opcode::SBC_A_L: operand = _regL; break;
+        case Opcode::SUB_aHL: case Opcode::SBC_A_aHL:
+            operand = _memory->read(regHL());
+            cycles = 2;
+            break;
+        case Opcode::SUB_N: case Opcode::SBC_A_N:
+            operand = _memory->read(_programCounter++);
+            cycles = 2;
+            break;
+    }
+
+    uint8_t carryValue = 0;
+
+    // All SBC instructions are at or above 0x08 in their row.
+    if (((opcode & 0x0f) >= 0x08) && cFlag()) {
+        carryValue = 1;
+    }
+
+    const uint8_t result = _regA - operand - carryValue;
+
+    zFlag(result == 0);
+    nFlag(true);
+    hFlag(((_regA & 0x0f) - (operand & 0x0f) - carryValue) < 0);
+    cFlag(result > _regA || result > operand);
+
+    _regA = result;
+
     return cycles;
 }

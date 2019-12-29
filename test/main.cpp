@@ -863,3 +863,32 @@ TEST_CASE("add with carry") {
     CLOCK(4);
     CHECK(testCPU._regA == 0x04);
 }
+
+TEST_CASE("subtract") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::SUB_B,
+        Opcode::SUB_C,
+        Opcode::SUB_D,
+        Opcode::SUB_E,
+        Opcode::SUB_H,
+        Opcode::SUB_L,
+        Opcode::SUB_aHL,
+        Opcode::SUB_N,
+        0x09,
+    });
+
+    testCPU._regA = 45;
+    testCPU._regB = 2;
+    testCPU._regC = 3;
+    testCPU._regD = 4;
+    testCPU._regE = 5;
+    testCPU._regH = 6;
+    testCPU._regL = 7;
+    simpleMemory->write(0x0607, 0x08);
+
+    CLOCK(40);
+
+    CHECK(testCPU._regA == (uint8_t)1);
+}

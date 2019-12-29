@@ -93,6 +93,7 @@ private:
     int8_t I_PushRegister(uint8_t opcode);
     int8_t I_PopRegister(uint8_t opcode);
     int8_t I_8BitAdd(uint8_t opcode);
+    int8_t I_8BitSubtract(uint8_t opcode);
 };
 
 #endif // __CPU_h_
