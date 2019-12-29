@@ -196,6 +196,17 @@ enum Opcode : uint8_t {
     OR_L =   0xb5,
     OR_aHL = 0xb6,
     OR_N =   0xf6,
+
+    // Logical XOR
+    XOR_A =   0xAF,
+    XOR_B =   0xA8,
+    XOR_C =   0xA9,
+    XOR_D =   0xAA,
+    XOR_E =   0xAB,
+    XOR_H =   0xAC,
+    XOR_L =   0xAD,
+    XOR_aHL = 0xAE,
+    XOR_N =   0xEE,
 };
 
 #endif // __Opcodes_h__

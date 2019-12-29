@@ -212,6 +212,16 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::OR_aHL:
         case Opcode::OR_N:
             return I_Or(opcode);
+        case Opcode::XOR_A:
+        case Opcode::XOR_B:
+        case Opcode::XOR_C:
+        case Opcode::XOR_D:
+        case Opcode::XOR_E:
+        case Opcode::XOR_H:
+        case Opcode::XOR_L:
+        case Opcode::XOR_aHL:
+        case Opcode::XOR_N:
+            return I_Xor(opcode);
     }
 }
 
@@ -513,27 +523,30 @@ int8_t CPU::I_8BitSubtract(uint8_t opcode) {
     return cycles;
 }
 
-int8_t CPU::I_And(uint8_t opcode) {
-    uint8_t operand = 0;
-    int8_t cycles = 1;
+#define DECODE_LOGICAL_OPERAND(operation) \
+    uint8_t operand = 0; \
+    int8_t cycles = 1; \
+ \
+    switch(opcode) { \
+        case Opcode::operation##_A: operand = _regA; break; \
+        case Opcode::operation##_B: operand = _regB; break; \
+        case Opcode::operation##_C: operand = _regC; break; \
+        case Opcode::operation##_D: operand = _regD; break; \
+        case Opcode::operation##_E: operand = _regE; break; \
+        case Opcode::operation##_H: operand = _regH; break; \
+        case Opcode::operation##_L: operand = _regL; break; \
+        case Opcode::operation##_aHL: \
+            operand = _memory->read(regHL()); \
+            cycles = 2; \
+            break; \
+        case Opcode::operation##_N: \
+            operand = _memory->read(_programCounter++); \
+            cycles = 2; \
+            break; \
+    } \
 
-    switch(opcode) {
-        case Opcode::AND_A: operand = _regA; break;
-        case Opcode::AND_B: operand = _regB; break;
-        case Opcode::AND_C: operand = _regC; break;
-        case Opcode::AND_D: operand = _regD; break;
-        case Opcode::AND_E: operand = _regE; break;
-        case Opcode::AND_H: operand = _regH; break;
-        case Opcode::AND_L: operand = _regL; break;
-        case Opcode::AND_aHL:
-            operand = _memory->read(regHL());
-            cycles = 2;
-            break;
-        case Opcode::AND_N:
-            operand = _memory->read(_programCounter++);
-            cycles = 2;
-            break;
-    }
+int8_t CPU::I_And(uint8_t opcode) {
+    DECODE_LOGICAL_OPERAND(AND);
 
     _regA = _regA & operand;
 
@@ -546,28 +559,22 @@ int8_t CPU::I_And(uint8_t opcode) {
 }
 
 int8_t CPU::I_Or(uint8_t opcode) {
-    uint8_t operand = 0;
-    int8_t cycles = 1;
-
-    switch(opcode) {
-        case Opcode::OR_A: operand = _regA; break;
-        case Opcode::OR_B: operand = _regB; break;
-        case Opcode::OR_C: operand = _regC; break;
-        case Opcode::OR_D: operand = _regD; break;
-        case Opcode::OR_E: operand = _regE; break;
-        case Opcode::OR_H: operand = _regH; break;
-        case Opcode::OR_L: operand = _regL; break;
-        case Opcode::OR_aHL:
-            operand = _memory->read(regHL());
-            cycles = 2;
-            break;
-        case Opcode::OR_N:
-            operand = _memory->read(_programCounter++);
-            cycles = 2;
-            break;
-    }
+    DECODE_LOGICAL_OPERAND(OR);
 
     _regA = _regA | operand;
+
+    zFlag(_regA == 0);
+    nFlag(false);
+    hFlag(false);
+    cFlag(false);
+
+    return cycles;
+}
+
+int8_t CPU::I_Xor(uint8_t opcode) {
+    DECODE_LOGICAL_OPERAND(XOR);
+
+    _regA = _regA ^ operand;
 
     zFlag(_regA == 0);
     nFlag(false);
