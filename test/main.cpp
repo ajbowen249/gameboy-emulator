@@ -892,3 +892,65 @@ TEST_CASE("subtract") {
 
     CHECK(testCPU._regA == (uint8_t)1);
 }
+
+TEST_CASE("and") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::AND_A,
+        Opcode::AND_B,
+        Opcode::AND_C,
+        Opcode::AND_D,
+        Opcode::AND_E,
+        Opcode::AND_H,
+        Opcode::AND_L,
+        Opcode::AND_aHL,
+        Opcode::AND_N,
+        0x00,
+    });
+
+    testCPU._regA = 0xff;
+    testCPU._regB = 0x7f;
+    testCPU._regC = 0x3f;
+    testCPU._regD = 0x1f;
+    testCPU._regE = 0x0f;
+    testCPU._regH = 0x07;
+    testCPU._regL = 0x03;
+    simpleMemory->write(0x0703, 0x01);
+
+    CLOCK(4);
+    CHECK(testCPU._regA == 0xff);
+    CHECK(testCPU.zFlag() == false);
+
+    CLOCK(4);
+    CHECK(testCPU._regA == 0x7f);
+    CHECK(testCPU.zFlag() == false);
+
+    CLOCK(4);
+    CHECK(testCPU._regA == 0x3f);
+    CHECK(testCPU.zFlag() == false);
+
+    CLOCK(4);
+    CHECK(testCPU._regA == 0x1f);
+    CHECK(testCPU.zFlag() == false);
+
+    CLOCK(4);
+    CHECK(testCPU._regA == 0x0f);
+    CHECK(testCPU.zFlag() == false);
+
+    CLOCK(4);
+    CHECK(testCPU._regA == 0x07);
+    CHECK(testCPU.zFlag() == false);
+
+    CLOCK(4);
+    CHECK(testCPU._regA == 0x03);
+    CHECK(testCPU.zFlag() == false);
+
+    CLOCK(8);
+    CHECK(testCPU._regA == 0x01);
+    CHECK(testCPU.zFlag() == false);
+
+    CLOCK(8);
+    CHECK(testCPU._regA == 0x00);
+    CHECK(testCPU.zFlag() == true);
+}

@@ -182,7 +182,26 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::SUB_L:
         case Opcode::SUB_aHL:
         case Opcode::SUB_N:
+        case Opcode::SBC_A_A:
+        case Opcode::SBC_A_B:
+        case Opcode::SBC_A_C:
+        case Opcode::SBC_A_D:
+        case Opcode::SBC_A_E:
+        case Opcode::SBC_A_H:
+        case Opcode::SBC_A_L:
+        case Opcode::SBC_A_aHL:
+        case Opcode::SBC_A_N:
             return I_8BitSubtract(opcode);
+        case Opcode::AND_A:
+        case Opcode::AND_B:
+        case Opcode::AND_C:
+        case Opcode::AND_D:
+        case Opcode::AND_E:
+        case Opcode::AND_H:
+        case Opcode::AND_L:
+        case Opcode::AND_aHL:
+        case Opcode::AND_N:
+            return I_And(opcode);
     }
 }
 
@@ -480,6 +499,38 @@ int8_t CPU::I_8BitSubtract(uint8_t opcode) {
     cFlag(result > _regA || result > operand);
 
     _regA = result;
+
+    return cycles;
+}
+
+int8_t CPU::I_And(uint8_t opcode) {
+    uint8_t operand = 0;
+    int8_t cycles = 1;
+
+    switch(opcode) {
+        case Opcode::AND_A: operand = _regA; break;
+        case Opcode::AND_B: operand = _regB; break;
+        case Opcode::AND_C: operand = _regC; break;
+        case Opcode::AND_D: operand = _regD; break;
+        case Opcode::AND_E: operand = _regE; break;
+        case Opcode::AND_H: operand = _regH; break;
+        case Opcode::AND_L: operand = _regL; break;
+        case Opcode::AND_aHL:
+            operand = _memory->read(regHL());
+            cycles = 2;
+            break;
+        case Opcode::AND_N:
+            operand = _memory->read(_programCounter++);
+            cycles = 2;
+            break;
+    }
+
+    _regA = _regA & operand;
+
+    zFlag(_regA == 0);
+    nFlag(false);
+    hFlag(true);
+    cFlag(false);
 
     return cycles;
 }

@@ -174,6 +174,17 @@ enum Opcode : uint8_t {
     SBC_A_L =   0x9d,
     SBC_A_aHL = 0x9e,
     SBC_A_N =   0xde,
+
+    // Logical AND
+    AND_A =   0xa7,
+    AND_B =   0xa0,
+    AND_C =   0xa1,
+    AND_D =   0xa2,
+    AND_E =   0xa3,
+    AND_H =   0xa4,
+    AND_L =   0xa5,
+    AND_aHL = 0xa6,
+    AND_N =   0xe6,
 };
 
 #endif // __Opcodes_h__
