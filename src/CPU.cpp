@@ -202,6 +202,16 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::AND_aHL:
         case Opcode::AND_N:
             return I_And(opcode);
+        case Opcode::OR_A:
+        case Opcode::OR_B:
+        case Opcode::OR_C:
+        case Opcode::OR_D:
+        case Opcode::OR_E:
+        case Opcode::OR_H:
+        case Opcode::OR_L:
+        case Opcode::OR_aHL:
+        case Opcode::OR_N:
+            return I_Or(opcode);
     }
 }
 
@@ -530,6 +540,38 @@ int8_t CPU::I_And(uint8_t opcode) {
     zFlag(_regA == 0);
     nFlag(false);
     hFlag(true);
+    cFlag(false);
+
+    return cycles;
+}
+
+int8_t CPU::I_Or(uint8_t opcode) {
+    uint8_t operand = 0;
+    int8_t cycles = 1;
+
+    switch(opcode) {
+        case Opcode::OR_A: operand = _regA; break;
+        case Opcode::OR_B: operand = _regB; break;
+        case Opcode::OR_C: operand = _regC; break;
+        case Opcode::OR_D: operand = _regD; break;
+        case Opcode::OR_E: operand = _regE; break;
+        case Opcode::OR_H: operand = _regH; break;
+        case Opcode::OR_L: operand = _regL; break;
+        case Opcode::OR_aHL:
+            operand = _memory->read(regHL());
+            cycles = 2;
+            break;
+        case Opcode::OR_N:
+            operand = _memory->read(_programCounter++);
+            cycles = 2;
+            break;
+    }
+
+    _regA = _regA | operand;
+
+    zFlag(_regA == 0);
+    nFlag(false);
+    hFlag(false);
     cFlag(false);
 
     return cycles;

@@ -185,6 +185,17 @@ enum Opcode : uint8_t {
     AND_L =   0xa5,
     AND_aHL = 0xa6,
     AND_N =   0xe6,
+
+    // Logical OR
+    OR_A =   0xb7,
+    OR_B =   0xb0,
+    OR_C =   0xb1,
+    OR_D =   0xb2,
+    OR_E =   0xb3,
+    OR_H =   0xb4,
+    OR_L =   0xb5,
+    OR_aHL = 0xb6,
+    OR_N =   0xf6,
 };
 
 #endif // __Opcodes_h__

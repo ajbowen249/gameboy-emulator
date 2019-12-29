@@ -954,3 +954,65 @@ TEST_CASE("and") {
     CHECK(testCPU._regA == 0x00);
     CHECK(testCPU.zFlag() == true);
 }
+
+TEST_CASE("or") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::OR_A,
+        Opcode::OR_B,
+        Opcode::OR_C,
+        Opcode::OR_D,
+        Opcode::OR_E,
+        Opcode::OR_H,
+        Opcode::OR_L,
+        Opcode::OR_aHL,
+        Opcode::OR_N,
+        0x01,
+    });
+
+    testCPU._regA = 0x00;
+    testCPU._regB = 0x80;
+    testCPU._regC = 0x40;
+    testCPU._regD = 0x20;
+    testCPU._regE = 0x10;
+    testCPU._regH = 0x08;
+    testCPU._regL = 0x04;
+    simpleMemory->write(0x0804, 0x02);
+
+    CLOCK(4);
+    CHECK(testCPU._regA == 0x00);
+    CHECK(testCPU.zFlag() == true);
+
+    CLOCK(4);
+    CHECK(testCPU._regA == 0x80);
+    CHECK(testCPU.zFlag() == false);
+
+    CLOCK(4);
+    CHECK(testCPU._regA == 0xc0);
+    CHECK(testCPU.zFlag() == false);
+
+    CLOCK(4);
+    CHECK(testCPU._regA == 0xe0);
+    CHECK(testCPU.zFlag() == false);
+
+    CLOCK(4);
+    CHECK(testCPU._regA == 0xf0);
+    CHECK(testCPU.zFlag() == false);
+
+    CLOCK(4);
+    CHECK(testCPU._regA == 0xf8);
+    CHECK(testCPU.zFlag() == false);
+
+    CLOCK(4);
+    CHECK(testCPU._regA == 0xfc);
+    CHECK(testCPU.zFlag() == false);
+
+    CLOCK(8);
+    CHECK(testCPU._regA == 0xfe);
+    CHECK(testCPU.zFlag() == false);
+
+    CLOCK(8);
+    CHECK(testCPU._regA == 0xff);
+    CHECK(testCPU.zFlag() == false);
+}
