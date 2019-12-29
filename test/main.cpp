@@ -1078,3 +1078,38 @@ TEST_CASE("xor") {
     CHECK(testCPU._regA == 0x01);
     CHECK(testCPU.zFlag() == false);
 }
+
+TEST_CASE("increment") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::INC_A,
+        Opcode::INC_B,
+        Opcode::INC_C,
+        Opcode::INC_D,
+        Opcode::INC_E,
+        Opcode::INC_H,
+        Opcode::INC_L,
+        Opcode::INC_aHL,
+    });
+
+    testCPU._regA = 0x00;
+    testCPU._regB = 0x01;
+    testCPU._regC = 0x02;
+    testCPU._regD = 0x03;
+    testCPU._regE = 0x04;
+    testCPU._regH = 0x05;
+    testCPU._regL = 0x06;
+    simpleMemory->write(0x0607, 0x07);
+
+    CLOCK(40);
+
+    CHECK(testCPU._regA == 0x01);
+    CHECK(testCPU._regB == 0x02);
+    CHECK(testCPU._regC == 0x03);
+    CHECK(testCPU._regD == 0x04);
+    CHECK(testCPU._regE == 0x05);
+    CHECK(testCPU._regH == 0x06);
+    CHECK(testCPU._regL == 0x07);
+    CHECK(simpleMemory->read(0x0607) == 0x08);
+}

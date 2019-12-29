@@ -232,6 +232,15 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::CP_aHL:
         case Opcode::CP_N:
             return I_Compare(opcode);
+        case Opcode::INC_A:
+        case Opcode::INC_B:
+        case Opcode::INC_C:
+        case Opcode::INC_D:
+        case Opcode::INC_E:
+        case Opcode::INC_H:
+        case Opcode::INC_L:
+        case Opcode::INC_aHL:
+            return I_Increment(opcode);
     }
 }
 
@@ -605,4 +614,32 @@ int8_t CPU::I_Compare(uint8_t opcode) {
     cFlag(result > _regA || result > operand);
 
     return cycles;
+}
+
+#define INC_REGISTER(reg) \
+    case Opcode::INC_##reg: original = _reg##reg; _reg##reg++; break; \
+
+int8_t CPU::I_Increment(uint8_t opcode) {
+    int8_t original = 0;
+    if (opcode == Opcode::INC_aHL) {
+        original = _memory->read(regHL());
+        _memory->write(regHL(), original + 1);
+    }
+
+    switch(opcode) {
+        INC_REGISTER(A)
+        INC_REGISTER(B)
+        INC_REGISTER(C)
+        INC_REGISTER(D)
+        INC_REGISTER(E)
+        INC_REGISTER(H)
+        INC_REGISTER(L)
+    }
+
+    int8_t newVal = original + 1;
+    zFlag(newVal == 0);
+    nFlag(false);
+    hFlag((((original & 0xf) + (1 & 0xf)) & 0x10) != 0);
+
+    return opcode == Opcode::INC_aHL ? 3 : 1;
 }

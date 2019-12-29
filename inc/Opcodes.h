@@ -218,6 +218,16 @@ enum Opcode : uint8_t {
     CP_L =   0xbd,
     CP_aHL = 0xbe,
     CP_N =   0xfe,
+
+    // Increment
+    INC_A =   0x3C,
+    INC_B =   0x04,
+    INC_C =   0x0C,
+    INC_D =   0x14,
+    INC_E =   0x1C,
+    INC_H =   0x24,
+    INC_L =   0x2C,
+    INC_aHL = 0x34,
 };
 
 #endif // __Opcodes_h__
