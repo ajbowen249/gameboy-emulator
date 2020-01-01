@@ -1148,3 +1148,49 @@ TEST_CASE("decrement") {
     CHECK(testCPU._regL == 0x06);
     CHECK(simpleMemory->read(0x0506) == 0x07);
 }
+
+TEST_CASE("16-bit add") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::ADD_HL_BC,
+        Opcode::ADD_HL_DE,
+        Opcode::ADD_HL_HL,
+        Opcode::ADD_HL_SP,
+    });
+
+    testCPU.regHL(0x01);
+    testCPU.regBC(0x01);
+
+    CLOCK(8);
+    CHECK(testCPU.regHL() == 0x02);
+    CHECK(testCPU.nFlag() == false);
+    CHECK(testCPU.hFlag() == false);
+    CHECK(testCPU.cFlag() == false);
+
+    testCPU.regHL(0xff9b);
+    testCPU.regDE(0x0069);
+
+    CLOCK(8);
+    CHECK(testCPU.regHL() == 0x04);
+    CHECK(testCPU.nFlag() == false);
+    CHECK(testCPU.hFlag() == true);
+    CHECK(testCPU.cFlag() == true);
+
+    testCPU.regHL(0x0a0b);
+
+    CLOCK(8);
+    CHECK(testCPU.regHL() == 0x1416);
+    CHECK(testCPU.nFlag() == false);
+    CHECK(testCPU.hFlag() == false);
+    CHECK(testCPU.cFlag() == false);
+
+    testCPU.regHL(0x0ffff);
+    testCPU._stackPointer = 0x0001;
+
+    CLOCK(8);
+    CHECK(testCPU.regHL() == 0x0000);
+    CHECK(testCPU.nFlag() == false);
+    CHECK(testCPU.hFlag() == true);
+    CHECK(testCPU.cFlag() == true);
+}

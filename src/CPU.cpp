@@ -250,6 +250,11 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::DEC_L:
         case Opcode::DEC_aHL:
             return I_Decrement(opcode);
+        case Opcode::ADD_HL_BC:
+        case Opcode::ADD_HL_DE:
+        case Opcode::ADD_HL_HL:
+        case Opcode::ADD_HL_SP:
+            return I_16BitAdd(opcode);
     }
 }
 
@@ -502,7 +507,7 @@ int8_t CPU::I_8BitAdd(uint8_t opcode) {
 
     zFlag(result == 0);
     nFlag(false);
-    hFlag((((_regA & 0xf) + (operand & 0xf)) & 0x10) != 0);
+    hFlag((((_regA & 0x0f) + (operand & 0x0f)) & 0x10) != 0);
     cFlag(result < _regA || result < operand);
 
     _regA = result;
@@ -679,4 +684,25 @@ int8_t CPU::I_Decrement(uint8_t opcode) {
     hFlag(((original & 0x0f) - (1 & 0x0f)) < 0);
 
     return opcode == Opcode::DEC_aHL ? 3 : 1;
+}
+
+int8_t CPU::I_16BitAdd(uint8_t opcode) {
+    uint16_t operand = 0;
+
+    switch(opcode) {
+        case Opcode::ADD_HL_BC: operand = regBC(); break;
+        case Opcode::ADD_HL_DE: operand = regDE(); break;
+        case Opcode::ADD_HL_HL: operand = regHL(); break;
+        case Opcode::ADD_HL_SP: operand = _stackPointer; break;
+    }
+
+    uint16_t result = regHL() + operand;
+
+    nFlag(false);
+    hFlag((((regHL() & 0x00ff) + (operand & 0x00ff)) & 0x0100) != 0);
+    cFlag(result < regHL() || result < operand);
+
+    regHL(result);
+
+    return 2;
 }

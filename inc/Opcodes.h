@@ -238,6 +238,12 @@ enum Opcode : uint8_t {
     DEC_H = 0x25,
     DEC_L = 0x2d,
     DEC_aHL = 0x35,
+
+    // 16-bit Add
+    ADD_HL_BC = 0x09,
+    ADD_HL_DE = 0x19,
+    ADD_HL_HL = 0x29,
+    ADD_HL_SP = 0x39,
 };
 
 #endif // __Opcodes_h__
