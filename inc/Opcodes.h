@@ -244,6 +244,9 @@ enum Opcode : uint8_t {
     ADD_HL_DE = 0x19,
     ADD_HL_HL = 0x29,
     ADD_HL_SP = 0x39,
+
+    // Add signed to SP
+    ADD_SP_N = 0xe8,
 };
 
 #endif // __Opcodes_h__

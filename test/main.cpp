@@ -1194,3 +1194,25 @@ TEST_CASE("16-bit add") {
     CHECK(testCPU.hFlag() == true);
     CHECK(testCPU.cFlag() == true);
 }
+
+TEST_CASE("add to SP") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    int8_t rawNeg2 = -2;
+    auto neg2 = *reinterpret_cast<uint8_t*>(&rawNeg2);
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::ADD_SP_N,
+        (int8_t)1,
+        Opcode::ADD_SP_N,
+        neg2,
+    });
+
+    testCPU._stackPointer = 0x05;
+
+    CLOCK(16);
+    CHECK(testCPU._stackPointer == 0x06);
+
+    CLOCK(16);
+    CHECK(testCPU._stackPointer == 0x04);
+}
