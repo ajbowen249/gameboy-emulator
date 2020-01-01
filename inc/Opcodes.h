@@ -247,6 +247,12 @@ enum Opcode : uint8_t {
 
     // Add signed to SP
     ADD_SP_N = 0xe8,
+
+    // 16-Bit Increment
+    INC_BC = 0x03,
+    INC_DE = 0x13,
+    INC_HL = 0x23,
+    INC_SP = 0x33,
 };
 
 #endif // __Opcodes_h__

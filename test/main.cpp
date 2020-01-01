@@ -1216,3 +1216,26 @@ TEST_CASE("add to SP") {
     CLOCK(16);
     CHECK(testCPU._stackPointer == 0x04);
 }
+
+TEST_CASE("16-bit increment") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::INC_BC,
+        Opcode::INC_DE,
+        Opcode::INC_HL,
+        Opcode::INC_SP,
+    });
+
+    testCPU.regBC(0x00);
+    testCPU.regDE(0x01);
+    testCPU.regHL(0x02);
+    testCPU._stackPointer = 0x03;
+
+    CLOCK(32);
+
+    CHECK(testCPU.regBC() == 0x01);
+    CHECK(testCPU.regDE() == 0x02);
+    CHECK(testCPU.regHL() == 0x03);
+    CHECK(testCPU._stackPointer == 0x04);
+}

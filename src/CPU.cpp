@@ -257,6 +257,11 @@ int8_t CPU::decodeAndExecute() {
             return I_16BitAdd(opcode);
         case Opcode::ADD_SP_N:
             return I_AddToSP();
+        case Opcode::INC_BC:
+        case Opcode::INC_DE:
+        case Opcode::INC_HL:
+        case Opcode::INC_SP:
+            return I_16BitIncrement(opcode);
     }
 }
 
@@ -723,4 +728,17 @@ int8_t CPU::I_AddToSP() {
     _stackPointer = result;
 
     return 4;
+}
+
+int8_t CPU::I_16BitIncrement(uint8_t opcode) {
+    // Affects no flags
+
+    switch(opcode) {
+        case Opcode::INC_BC: regBC(regBC() + 1); break;
+        case Opcode::INC_DE: regDE(regDE() + 1); break;
+        case Opcode::INC_HL: regHL(regHL() + 1); break;
+        case Opcode::INC_SP: _stackPointer++; break;
+    }
+
+    return 2;
 }
