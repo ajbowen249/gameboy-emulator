@@ -228,6 +228,16 @@ enum Opcode : uint8_t {
     INC_H =   0x24,
     INC_L =   0x2C,
     INC_aHL = 0x34,
+
+    // Decrement
+    DEC_A = 0x3d,
+    DEC_B = 0x05,
+    DEC_C = 0x0d,
+    DEC_D = 0x15,
+    DEC_E = 0x1d,
+    DEC_H = 0x25,
+    DEC_L = 0x2d,
+    DEC_aHL = 0x35,
 };
 
 #endif // __Opcodes_h__

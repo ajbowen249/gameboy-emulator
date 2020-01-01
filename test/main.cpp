@@ -1113,3 +1113,38 @@ TEST_CASE("increment") {
     CHECK(testCPU._regL == 0x07);
     CHECK(simpleMemory->read(0x0607) == 0x08);
 }
+
+TEST_CASE("decrement") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::DEC_A,
+        Opcode::DEC_B,
+        Opcode::DEC_C,
+        Opcode::DEC_D,
+        Opcode::DEC_E,
+        Opcode::DEC_H,
+        Opcode::DEC_L,
+        Opcode::DEC_aHL,
+    });
+
+    testCPU._regA = 0x01;
+    testCPU._regB = 0x02;
+    testCPU._regC = 0x03;
+    testCPU._regD = 0x04;
+    testCPU._regE = 0x05;
+    testCPU._regH = 0x06;
+    testCPU._regL = 0x07;
+    simpleMemory->write(0x0506, 0x08);
+
+    CLOCK(40);
+
+    CHECK(testCPU._regA == 0x00);
+    CHECK(testCPU._regB == 0x01);
+    CHECK(testCPU._regC == 0x02);
+    CHECK(testCPU._regD == 0x03);
+    CHECK(testCPU._regE == 0x04);
+    CHECK(testCPU._regH == 0x05);
+    CHECK(testCPU._regL == 0x06);
+    CHECK(simpleMemory->read(0x0506) == 0x07);
+}

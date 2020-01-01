@@ -241,6 +241,15 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::INC_L:
         case Opcode::INC_aHL:
             return I_Increment(opcode);
+        case Opcode::DEC_A:
+        case Opcode::DEC_B:
+        case Opcode::DEC_C:
+        case Opcode::DEC_D:
+        case Opcode::DEC_E:
+        case Opcode::DEC_H:
+        case Opcode::DEC_L:
+        case Opcode::DEC_aHL:
+            return I_Decrement(opcode);
     }
 }
 
@@ -642,4 +651,32 @@ int8_t CPU::I_Increment(uint8_t opcode) {
     hFlag((((original & 0xf) + (1 & 0xf)) & 0x10) != 0);
 
     return opcode == Opcode::INC_aHL ? 3 : 1;
+}
+
+#define DEC_REGISTER(reg) \
+    case Opcode::DEC_##reg: original = _reg##reg; _reg##reg--; break; \
+
+int8_t CPU::I_Decrement(uint8_t opcode) {
+    int8_t original = 0;
+    if (opcode == Opcode::DEC_aHL) {
+        original = _memory->read(regHL());
+        _memory->write(regHL(), original - 1);
+    }
+
+    switch(opcode) {
+        DEC_REGISTER(A)
+        DEC_REGISTER(B)
+        DEC_REGISTER(C)
+        DEC_REGISTER(D)
+        DEC_REGISTER(E)
+        DEC_REGISTER(H)
+        DEC_REGISTER(L)
+    }
+
+    int8_t newVal = original - 1;
+    zFlag(newVal == 0);
+    nFlag(true);
+    hFlag(((original & 0x0f) - (1 & 0x0f)) < 0);
+
+    return opcode == Opcode::DEC_aHL ? 3 : 1;
 }
