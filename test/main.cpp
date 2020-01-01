@@ -1148,3 +1148,118 @@ TEST_CASE("decrement") {
     CHECK(testCPU._regL == 0x06);
     CHECK(simpleMemory->read(0x0506) == 0x07);
 }
+
+TEST_CASE("16-bit add") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::ADD_HL_BC,
+        Opcode::ADD_HL_DE,
+        Opcode::ADD_HL_HL,
+        Opcode::ADD_HL_SP,
+    });
+
+    testCPU.regHL(0x01);
+    testCPU.regBC(0x01);
+
+    CLOCK(8);
+    CHECK(testCPU.regHL() == 0x02);
+    CHECK(testCPU.nFlag() == false);
+    CHECK(testCPU.hFlag() == false);
+    CHECK(testCPU.cFlag() == false);
+
+    testCPU.regHL(0xff9b);
+    testCPU.regDE(0x0069);
+
+    CLOCK(8);
+    CHECK(testCPU.regHL() == 0x04);
+    CHECK(testCPU.nFlag() == false);
+    CHECK(testCPU.hFlag() == true);
+    CHECK(testCPU.cFlag() == true);
+
+    testCPU.regHL(0x0a0b);
+
+    CLOCK(8);
+    CHECK(testCPU.regHL() == 0x1416);
+    CHECK(testCPU.nFlag() == false);
+    CHECK(testCPU.hFlag() == false);
+    CHECK(testCPU.cFlag() == false);
+
+    testCPU.regHL(0x0ffff);
+    testCPU._stackPointer = 0x0001;
+
+    CLOCK(8);
+    CHECK(testCPU.regHL() == 0x0000);
+    CHECK(testCPU.nFlag() == false);
+    CHECK(testCPU.hFlag() == true);
+    CHECK(testCPU.cFlag() == true);
+}
+
+TEST_CASE("add to SP") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    int8_t rawNeg2 = -2;
+    auto neg2 = *reinterpret_cast<uint8_t*>(&rawNeg2);
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::ADD_SP_N,
+        (int8_t)1,
+        Opcode::ADD_SP_N,
+        neg2,
+    });
+
+    testCPU._stackPointer = 0x05;
+
+    CLOCK(16);
+    CHECK(testCPU._stackPointer == 0x06);
+
+    CLOCK(16);
+    CHECK(testCPU._stackPointer == 0x04);
+}
+
+TEST_CASE("16-bit increment") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::INC_BC,
+        Opcode::INC_DE,
+        Opcode::INC_HL,
+        Opcode::INC_SP,
+    });
+
+    testCPU.regBC(0x00);
+    testCPU.regDE(0x01);
+    testCPU.regHL(0x02);
+    testCPU._stackPointer = 0x03;
+
+    CLOCK(32);
+
+    CHECK(testCPU.regBC() == 0x01);
+    CHECK(testCPU.regDE() == 0x02);
+    CHECK(testCPU.regHL() == 0x03);
+    CHECK(testCPU._stackPointer == 0x04);
+}
+
+TEST_CASE("16-bit decrement") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::DEC_BC,
+        Opcode::DEC_DE,
+        Opcode::DEC_HL,
+        Opcode::DEC_SP,
+    });
+
+    testCPU.regBC(0x00);
+    testCPU.regDE(0x01);
+    testCPU.regHL(0x02);
+    testCPU._stackPointer = 0x03;
+
+    CLOCK(32);
+
+    CHECK(testCPU.regBC() == 0xffff);
+    CHECK(testCPU.regDE() == 0x0000);
+    CHECK(testCPU.regHL() == 0x0001);
+    CHECK(testCPU._stackPointer == 0x0002);
+}
+

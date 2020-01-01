@@ -250,6 +250,23 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::DEC_L:
         case Opcode::DEC_aHL:
             return I_Decrement(opcode);
+        case Opcode::ADD_HL_BC:
+        case Opcode::ADD_HL_DE:
+        case Opcode::ADD_HL_HL:
+        case Opcode::ADD_HL_SP:
+            return I_16BitAdd(opcode);
+        case Opcode::ADD_SP_N:
+            return I_AddToSP();
+        case Opcode::INC_BC:
+        case Opcode::INC_DE:
+        case Opcode::INC_HL:
+        case Opcode::INC_SP:
+            return I_16BitIncrement(opcode);
+        case Opcode::DEC_BC:
+        case Opcode::DEC_DE:
+        case Opcode::DEC_HL:
+        case Opcode::DEC_SP:
+            return I_16BitDecrement(opcode);
     }
 }
 
@@ -502,7 +519,7 @@ int8_t CPU::I_8BitAdd(uint8_t opcode) {
 
     zFlag(result == 0);
     nFlag(false);
-    hFlag((((_regA & 0xf) + (operand & 0xf)) & 0x10) != 0);
+    hFlag((((_regA & 0x0f) + (operand & 0x0f)) & 0x10) != 0);
     cFlag(result < _regA || result < operand);
 
     _regA = result;
@@ -629,7 +646,7 @@ int8_t CPU::I_Compare(uint8_t opcode) {
     case Opcode::INC_##reg: original = _reg##reg; _reg##reg++; break; \
 
 int8_t CPU::I_Increment(uint8_t opcode) {
-    int8_t original = 0;
+    uint8_t original = 0;
     if (opcode == Opcode::INC_aHL) {
         original = _memory->read(regHL());
         _memory->write(regHL(), original + 1);
@@ -645,7 +662,7 @@ int8_t CPU::I_Increment(uint8_t opcode) {
         INC_REGISTER(L)
     }
 
-    int8_t newVal = original + 1;
+    uint8_t newVal = original + 1;
     zFlag(newVal == 0);
     nFlag(false);
     hFlag((((original & 0xf) + (1 & 0xf)) & 0x10) != 0);
@@ -657,7 +674,7 @@ int8_t CPU::I_Increment(uint8_t opcode) {
     case Opcode::DEC_##reg: original = _reg##reg; _reg##reg--; break; \
 
 int8_t CPU::I_Decrement(uint8_t opcode) {
-    int8_t original = 0;
+    uint8_t original = 0;
     if (opcode == Opcode::DEC_aHL) {
         original = _memory->read(regHL());
         _memory->write(regHL(), original - 1);
@@ -673,10 +690,73 @@ int8_t CPU::I_Decrement(uint8_t opcode) {
         DEC_REGISTER(L)
     }
 
-    int8_t newVal = original - 1;
+    uint8_t newVal = original - 1;
     zFlag(newVal == 0);
     nFlag(true);
     hFlag(((original & 0x0f) - (1 & 0x0f)) < 0);
 
     return opcode == Opcode::DEC_aHL ? 3 : 1;
+}
+
+int8_t CPU::I_16BitAdd(uint8_t opcode) {
+    uint16_t operand = 0;
+
+    switch(opcode) {
+        case Opcode::ADD_HL_BC: operand = regBC(); break;
+        case Opcode::ADD_HL_DE: operand = regDE(); break;
+        case Opcode::ADD_HL_HL: operand = regHL(); break;
+        case Opcode::ADD_HL_SP: operand = _stackPointer; break;
+    }
+
+    uint16_t result = regHL() + operand;
+
+    nFlag(false);
+    hFlag((((regHL() & 0x00ff) + (operand & 0x00ff)) & 0x0100) != 0);
+    cFlag(result < regHL() || result < operand);
+
+    regHL(result);
+
+    return 2;
+}
+
+int8_t CPU::I_AddToSP() {
+    auto rawOperand = _memory->read(_programCounter++);
+    auto operand = *reinterpret_cast<int8_t*>(&rawOperand);
+
+    uint16_t result = _stackPointer + operand;
+
+    zFlag(false);
+    nFlag(false);
+    hFlag((((_stackPointer & 0x00ff) + (operand & 0x00ff)) & 0x0100) != 0);
+    cFlag(result < _stackPointer || result < operand);
+
+    _stackPointer = result;
+
+    return 4;
+}
+
+int8_t CPU::I_16BitIncrement(uint8_t opcode) {
+    // Affects no flags
+
+    switch(opcode) {
+        case Opcode::INC_BC: regBC(regBC() + 1); break;
+        case Opcode::INC_DE: regDE(regDE() + 1); break;
+        case Opcode::INC_HL: regHL(regHL() + 1); break;
+        case Opcode::INC_SP: _stackPointer++; break;
+    }
+
+    return 2;
+}
+
+int8_t CPU::I_16BitDecrement(uint8_t opcode) {
+    // Affects no flags
+
+    switch(opcode) {
+        case Opcode::DEC_BC: regBC(regBC() - 1); break;
+        case Opcode::DEC_DE: regDE(regDE() - 1); break;
+        case Opcode::DEC_HL: regHL(regHL() - 1); break;
+        case Opcode::DEC_SP: _stackPointer--; break;
+    }
+
+    return 2;
 }
