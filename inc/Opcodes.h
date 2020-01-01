@@ -253,6 +253,12 @@ enum Opcode : uint8_t {
     INC_DE = 0x13,
     INC_HL = 0x23,
     INC_SP = 0x33,
+
+    // 16-Bit Decrement
+    DEC_BC = 0x0b,
+    DEC_DE = 0x1b,
+    DEC_HL = 0x2b,
+    DEC_SP = 0x3b,
 };
 
 #endif // __Opcodes_h__

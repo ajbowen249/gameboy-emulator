@@ -103,6 +103,7 @@ private:
     int8_t I_16BitAdd(uint8_t opcode);
     int8_t I_AddToSP();
     int8_t I_16BitIncrement(uint8_t opcode);
+    int8_t I_16BitDecrement(uint8_t opcode);
 };
 
 #endif // __CPU_h_

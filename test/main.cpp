@@ -1239,3 +1239,27 @@ TEST_CASE("16-bit increment") {
     CHECK(testCPU.regHL() == 0x03);
     CHECK(testCPU._stackPointer == 0x04);
 }
+
+TEST_CASE("16-bit decrement") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::DEC_BC,
+        Opcode::DEC_DE,
+        Opcode::DEC_HL,
+        Opcode::DEC_SP,
+    });
+
+    testCPU.regBC(0x00);
+    testCPU.regDE(0x01);
+    testCPU.regHL(0x02);
+    testCPU._stackPointer = 0x03;
+
+    CLOCK(32);
+
+    CHECK(testCPU.regBC() == 0xffff);
+    CHECK(testCPU.regDE() == 0x0000);
+    CHECK(testCPU.regHL() == 0x0001);
+    CHECK(testCPU._stackPointer == 0x0002);
+}
+
