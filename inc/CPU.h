@@ -92,6 +92,14 @@ private:
     int8_t I_StoreStackPointer();
     int8_t I_PushRegister(uint8_t opcode);
     int8_t I_PopRegister(uint8_t opcode);
+    int8_t I_8BitAdd(uint8_t opcode);
+    int8_t I_8BitSubtract(uint8_t opcode);
+    int8_t I_And(uint8_t opcode);
+    int8_t I_Or(uint8_t opcode);
+    int8_t I_Xor(uint8_t opcode);
+    int8_t I_Compare(uint8_t opcode);
+    int8_t I_Increment(uint8_t opcode);
+    int8_t I_Decrement(uint8_t opcode);
 };
 
 #endif // __CPU_h_

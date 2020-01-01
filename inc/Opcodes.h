@@ -130,6 +130,114 @@ enum Opcode : uint8_t {
     POP_BC = 0xc1,
     POP_DE = 0xd1,
     POP_HL = 0xe1,
+
+    // 8-bit Add
+    ADD_A_A =   0x87,
+    ADD_A_B =   0x80,
+    ADD_A_C =   0x81,
+    ADD_A_D =   0x82,
+    ADD_A_E =   0x83,
+    ADD_A_H =   0x84,
+    ADD_A_L =   0x85,
+    ADD_A_aHL = 0x86,
+    ADD_A_N  =  0xc6,
+
+    // 8-bit Add with Carry
+    ADC_A_A =   0x8f,
+    ADC_A_B =   0x88,
+    ADC_A_C =   0x89,
+    ADC_A_D =   0x8a,
+    ADC_A_E =   0x8b,
+    ADC_A_H =   0x8c,
+    ADC_A_L =   0x8d,
+    ADC_A_aHL = 0x8e,
+    ADC_A_N =   0xce,
+
+    // 8-bit Subtract
+    SUB_A =   0x97,
+    SUB_B =   0x90,
+    SUB_C =   0x91,
+    SUB_D =   0x92,
+    SUB_E =   0x93,
+    SUB_H =   0x94,
+    SUB_L =   0x95,
+    SUB_aHL = 0x96,
+    SUB_N =   0xd6,
+
+    // 8-bit Subtract with Carry
+    SBC_A_A =   0x9f,
+    SBC_A_B =   0x98,
+    SBC_A_C =   0x99,
+    SBC_A_D =   0x9a,
+    SBC_A_E =   0x9b,
+    SBC_A_H =   0x9c,
+    SBC_A_L =   0x9d,
+    SBC_A_aHL = 0x9e,
+    SBC_A_N =   0xde,
+
+    // Logical AND
+    AND_A =   0xa7,
+    AND_B =   0xa0,
+    AND_C =   0xa1,
+    AND_D =   0xa2,
+    AND_E =   0xa3,
+    AND_H =   0xa4,
+    AND_L =   0xa5,
+    AND_aHL = 0xa6,
+    AND_N =   0xe6,
+
+    // Logical OR
+    OR_A =   0xb7,
+    OR_B =   0xb0,
+    OR_C =   0xb1,
+    OR_D =   0xb2,
+    OR_E =   0xb3,
+    OR_H =   0xb4,
+    OR_L =   0xb5,
+    OR_aHL = 0xb6,
+    OR_N =   0xf6,
+
+    // Logical XOR
+    XOR_A =   0xaf,
+    XOR_B =   0xa8,
+    XOR_C =   0xa9,
+    XOR_D =   0xaa,
+    XOR_E =   0xab,
+    XOR_H =   0xac,
+    XOR_L =   0xad,
+    XOR_aHL = 0xae,
+    XOR_N =   0xee,
+
+    // Subtract, but don't store results, just set flags.
+    CP_A =   0xbf,
+    CP_B =   0xb8,
+    CP_C =   0xb9,
+    CP_D =   0xba,
+    CP_E =   0xbb,
+    CP_H =   0xbc,
+    CP_L =   0xbd,
+    CP_aHL = 0xbe,
+    CP_N =   0xfe,
+
+    // Increment
+    INC_A =   0x3C,
+    INC_B =   0x04,
+    INC_C =   0x0C,
+    INC_D =   0x14,
+    INC_E =   0x1C,
+    INC_H =   0x24,
+    INC_L =   0x2C,
+    INC_aHL = 0x34,
+
+    // Decrement
+    DEC_A = 0x3d,
+    DEC_B = 0x05,
+    DEC_C = 0x0d,
+    DEC_D = 0x15,
+    DEC_E = 0x1d,
+    DEC_H = 0x25,
+    DEC_L = 0x2d,
+    DEC_aHL = 0x35,
 };
 
 #endif // __Opcodes_h__

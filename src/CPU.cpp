@@ -154,6 +154,102 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::POP_DE:
         case Opcode::POP_HL:
             return I_PopRegister(opcode);
+        case Opcode::ADD_A_A:
+        case Opcode::ADD_A_B:
+        case Opcode::ADD_A_C:
+        case Opcode::ADD_A_D:
+        case Opcode::ADD_A_E:
+        case Opcode::ADD_A_H:
+        case Opcode::ADD_A_L:
+        case Opcode::ADD_A_aHL:
+        case Opcode::ADD_A_N:
+        case Opcode::ADC_A_A:
+        case Opcode::ADC_A_B:
+        case Opcode::ADC_A_C:
+        case Opcode::ADC_A_D:
+        case Opcode::ADC_A_E:
+        case Opcode::ADC_A_H:
+        case Opcode::ADC_A_L:
+        case Opcode::ADC_A_aHL:
+        case Opcode::ADC_A_N:
+            return I_8BitAdd(opcode);
+        case Opcode::SUB_A:
+        case Opcode::SUB_B:
+        case Opcode::SUB_C:
+        case Opcode::SUB_D:
+        case Opcode::SUB_E:
+        case Opcode::SUB_H:
+        case Opcode::SUB_L:
+        case Opcode::SUB_aHL:
+        case Opcode::SUB_N:
+        case Opcode::SBC_A_A:
+        case Opcode::SBC_A_B:
+        case Opcode::SBC_A_C:
+        case Opcode::SBC_A_D:
+        case Opcode::SBC_A_E:
+        case Opcode::SBC_A_H:
+        case Opcode::SBC_A_L:
+        case Opcode::SBC_A_aHL:
+        case Opcode::SBC_A_N:
+            return I_8BitSubtract(opcode);
+        case Opcode::AND_A:
+        case Opcode::AND_B:
+        case Opcode::AND_C:
+        case Opcode::AND_D:
+        case Opcode::AND_E:
+        case Opcode::AND_H:
+        case Opcode::AND_L:
+        case Opcode::AND_aHL:
+        case Opcode::AND_N:
+            return I_And(opcode);
+        case Opcode::OR_A:
+        case Opcode::OR_B:
+        case Opcode::OR_C:
+        case Opcode::OR_D:
+        case Opcode::OR_E:
+        case Opcode::OR_H:
+        case Opcode::OR_L:
+        case Opcode::OR_aHL:
+        case Opcode::OR_N:
+            return I_Or(opcode);
+        case Opcode::XOR_A:
+        case Opcode::XOR_B:
+        case Opcode::XOR_C:
+        case Opcode::XOR_D:
+        case Opcode::XOR_E:
+        case Opcode::XOR_H:
+        case Opcode::XOR_L:
+        case Opcode::XOR_aHL:
+        case Opcode::XOR_N:
+            return I_Xor(opcode);
+        case Opcode::CP_A:
+        case Opcode::CP_B:
+        case Opcode::CP_C:
+        case Opcode::CP_D:
+        case Opcode::CP_E:
+        case Opcode::CP_H:
+        case Opcode::CP_L:
+        case Opcode::CP_aHL:
+        case Opcode::CP_N:
+            return I_Compare(opcode);
+        case Opcode::INC_A:
+        case Opcode::INC_B:
+        case Opcode::INC_C:
+        case Opcode::INC_D:
+        case Opcode::INC_E:
+        case Opcode::INC_H:
+        case Opcode::INC_L:
+        case Opcode::INC_aHL:
+            return I_Increment(opcode);
+        case Opcode::DEC_A:
+        case Opcode::DEC_B:
+        case Opcode::DEC_C:
+        case Opcode::DEC_D:
+        case Opcode::DEC_E:
+        case Opcode::DEC_H:
+        case Opcode::DEC_L:
+        case Opcode::DEC_aHL:
+            return I_Decrement(opcode);
     }
 }
 
@@ -373,4 +469,214 @@ int8_t CPU::I_PopRegister(uint8_t opcode) {
     }
 
     return 3;
+}
+
+int8_t CPU::I_8BitAdd(uint8_t opcode) {
+    uint8_t operand = 0;
+    int8_t cycles = 1;
+
+    switch(opcode) {
+        case Opcode::ADD_A_A: case Opcode::ADC_A_A: operand = _regA; break;
+        case Opcode::ADD_A_B: case Opcode::ADC_A_B: operand = _regB; break;
+        case Opcode::ADD_A_C: case Opcode::ADC_A_C: operand = _regC; break;
+        case Opcode::ADD_A_D: case Opcode::ADC_A_D: operand = _regD; break;
+        case Opcode::ADD_A_E: case Opcode::ADC_A_E: operand = _regE; break;
+        case Opcode::ADD_A_H: case Opcode::ADC_A_H: operand = _regH; break;
+        case Opcode::ADD_A_L: case Opcode::ADC_A_L: operand = _regL; break;
+        case Opcode::ADD_A_aHL: case Opcode::ADC_A_aHL:
+            operand = _memory->read(regHL());
+            cycles = 2;
+            break;
+        case Opcode::ADD_A_N: case Opcode::ADC_A_N:
+            operand = _memory->read(_programCounter++);
+            cycles = 2;
+            break;
+    }
+
+    // All ADC instructions are at or above 0x08 in their row.
+    if (((opcode & 0x0f) >= 0x08) && cFlag()) {
+        operand++;
+    }
+
+    const uint8_t result = _regA + operand;
+
+    zFlag(result == 0);
+    nFlag(false);
+    hFlag((((_regA & 0xf) + (operand & 0xf)) & 0x10) != 0);
+    cFlag(result < _regA || result < operand);
+
+    _regA = result;
+
+    return cycles;
+}
+
+int8_t CPU::I_8BitSubtract(uint8_t opcode) {
+    uint8_t operand = 0;
+    int8_t cycles = 1;
+
+    switch(opcode) {
+        case Opcode::SUB_A: case Opcode::SBC_A_A: operand = _regA; break;
+        case Opcode::SUB_B: case Opcode::SBC_A_B: operand = _regB; break;
+        case Opcode::SUB_C: case Opcode::SBC_A_C: operand = _regC; break;
+        case Opcode::SUB_D: case Opcode::SBC_A_D: operand = _regD; break;
+        case Opcode::SUB_E: case Opcode::SBC_A_E: operand = _regE; break;
+        case Opcode::SUB_H: case Opcode::SBC_A_H: operand = _regH; break;
+        case Opcode::SUB_L: case Opcode::SBC_A_L: operand = _regL; break;
+        case Opcode::SUB_aHL: case Opcode::SBC_A_aHL:
+            operand = _memory->read(regHL());
+            cycles = 2;
+            break;
+        case Opcode::SUB_N: case Opcode::SBC_A_N:
+            operand = _memory->read(_programCounter++);
+            cycles = 2;
+            break;
+    }
+
+    uint8_t carryValue = 0;
+
+    // All SBC instructions are at or above 0x08 in their row.
+    if (((opcode & 0x0f) >= 0x08) && cFlag()) {
+        carryValue = 1;
+    }
+
+    const uint8_t result = _regA - operand - carryValue;
+
+    zFlag(result == 0);
+    nFlag(true);
+    hFlag(((_regA & 0x0f) - (operand & 0x0f) - carryValue) < 0);
+    cFlag(result > _regA || result > operand);
+
+    _regA = result;
+
+    return cycles;
+}
+
+#define DECODE_LOGICAL_OPERAND(operation) \
+    uint8_t operand = 0; \
+    int8_t cycles = 1; \
+ \
+    switch(opcode) { \
+        case Opcode::operation##_A: operand = _regA; break; \
+        case Opcode::operation##_B: operand = _regB; break; \
+        case Opcode::operation##_C: operand = _regC; break; \
+        case Opcode::operation##_D: operand = _regD; break; \
+        case Opcode::operation##_E: operand = _regE; break; \
+        case Opcode::operation##_H: operand = _regH; break; \
+        case Opcode::operation##_L: operand = _regL; break; \
+        case Opcode::operation##_aHL: \
+            operand = _memory->read(regHL()); \
+            cycles = 2; \
+            break; \
+        case Opcode::operation##_N: \
+            operand = _memory->read(_programCounter++); \
+            cycles = 2; \
+            break; \
+    } \
+
+int8_t CPU::I_And(uint8_t opcode) {
+    DECODE_LOGICAL_OPERAND(AND);
+
+    _regA = _regA & operand;
+
+    zFlag(_regA == 0);
+    nFlag(false);
+    hFlag(true);
+    cFlag(false);
+
+    return cycles;
+}
+
+int8_t CPU::I_Or(uint8_t opcode) {
+    DECODE_LOGICAL_OPERAND(OR);
+
+    _regA = _regA | operand;
+
+    zFlag(_regA == 0);
+    nFlag(false);
+    hFlag(false);
+    cFlag(false);
+
+    return cycles;
+}
+
+int8_t CPU::I_Xor(uint8_t opcode) {
+    DECODE_LOGICAL_OPERAND(XOR);
+
+    _regA = _regA ^ operand;
+
+    zFlag(_regA == 0);
+    nFlag(false);
+    hFlag(false);
+    cFlag(false);
+
+    return cycles;
+}
+
+int8_t CPU::I_Compare(uint8_t opcode) {
+    DECODE_LOGICAL_OPERAND(CP);
+
+    const uint8_t result = _regA - operand;
+
+    zFlag(result == 0);
+    nFlag(true);
+    hFlag(((_regA & 0x0f) - (operand & 0x0f)) < 0);
+    cFlag(result > _regA || result > operand);
+
+    return cycles;
+}
+
+#define INC_REGISTER(reg) \
+    case Opcode::INC_##reg: original = _reg##reg; _reg##reg++; break; \
+
+int8_t CPU::I_Increment(uint8_t opcode) {
+    int8_t original = 0;
+    if (opcode == Opcode::INC_aHL) {
+        original = _memory->read(regHL());
+        _memory->write(regHL(), original + 1);
+    }
+
+    switch(opcode) {
+        INC_REGISTER(A)
+        INC_REGISTER(B)
+        INC_REGISTER(C)
+        INC_REGISTER(D)
+        INC_REGISTER(E)
+        INC_REGISTER(H)
+        INC_REGISTER(L)
+    }
+
+    int8_t newVal = original + 1;
+    zFlag(newVal == 0);
+    nFlag(false);
+    hFlag((((original & 0xf) + (1 & 0xf)) & 0x10) != 0);
+
+    return opcode == Opcode::INC_aHL ? 3 : 1;
+}
+
+#define DEC_REGISTER(reg) \
+    case Opcode::DEC_##reg: original = _reg##reg; _reg##reg--; break; \
+
+int8_t CPU::I_Decrement(uint8_t opcode) {
+    int8_t original = 0;
+    if (opcode == Opcode::DEC_aHL) {
+        original = _memory->read(regHL());
+        _memory->write(regHL(), original - 1);
+    }
+
+    switch(opcode) {
+        DEC_REGISTER(A)
+        DEC_REGISTER(B)
+        DEC_REGISTER(C)
+        DEC_REGISTER(D)
+        DEC_REGISTER(E)
+        DEC_REGISTER(H)
+        DEC_REGISTER(L)
+    }
+
+    int8_t newVal = original - 1;
+    zFlag(newVal == 0);
+    nFlag(true);
+    hFlag(((original & 0x0f) - (1 & 0x0f)) < 0);
+
+    return opcode == Opcode::DEC_aHL ? 3 : 1;
 }
