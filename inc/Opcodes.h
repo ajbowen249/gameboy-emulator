@@ -274,6 +274,9 @@ enum Opcode : uint8_t {
 
     // No-Op
     NOP = 0x00,
+
+    // Unconditional Jump
+    JP_NN = 0xc3,
 };
 
 #endif // __Opcodes_h__

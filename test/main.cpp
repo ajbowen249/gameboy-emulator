@@ -1333,3 +1333,17 @@ TEST_CASE("set carry") {
     CLOCK(4);
     CHECK(testCPU.cFlag() == true);
 }
+
+TEST_CASE("unconditional jump") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::JP_NN,
+        0x02,
+        0x01,
+    });
+
+    CLOCK(12);
+
+    CHECK(testCPU._programCounter == 0x0102);
+}

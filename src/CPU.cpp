@@ -275,6 +275,8 @@ int8_t CPU::decodeAndExecute() {
             return I_ComplementCarry();
         case Opcode::SCF:
             return I_SetCarry();
+        case Opcode::JP_NN:
+            return I_UnconditionalJump();
         case NOP:
         default:
             return 1;
@@ -823,4 +825,9 @@ int8_t CPU::I_SetCarry() {
     cFlag(true);
 
     return 1;
+}
+
+int8_t CPU::I_UnconditionalJump() {
+    _programCounter = _memory->readLI(_programCounter);
+    return 3;
 }
