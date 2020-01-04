@@ -271,6 +271,9 @@ enum Opcode : uint8_t {
 
     // Set the Carry Flag
     SCF = 0x37,
+
+    // No-Op
+    NOP = 0x00,
 };
 
 #endif // __Opcodes_h__

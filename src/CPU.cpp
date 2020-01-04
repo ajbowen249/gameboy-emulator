@@ -275,6 +275,9 @@ int8_t CPU::decodeAndExecute() {
             return I_ComplementCarry();
         case Opcode::SCF:
             return I_SetCarry();
+        case NOP:
+        default:
+            return 1;
     }
 }
 
