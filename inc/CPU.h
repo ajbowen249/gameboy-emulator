@@ -111,6 +111,7 @@ private:
     int8_t I_UnconditionalJump();
     int8_t I_ConditionalJump(uint8_t opcode);
     int8_t I_JumpToHL();
+    int8_t I_UnconditionalRelativeJump();
 };
 
 #endif // __CPU_h_

@@ -1410,3 +1410,25 @@ TEST_CASE("jump to HL") {
     CLOCK(4);
     CHECK(testCPU._programCounter == 0x0102);
 }
+
+TEST_CASE("unconditional relative jump") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    int8_t rawNeg3 = -3;
+    auto neg3 = *reinterpret_cast<uint8_t*>(&rawNeg3);
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::JR_N,
+        0x01,
+        Opcode::JR_N,
+        neg3,
+    });
+
+    CLOCK(8);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 3);
+
+    testCPU._programCounter = INIT_VECTOR + 2;
+
+    CLOCK(8);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 1);
+}

@@ -286,6 +286,9 @@ enum Opcode : uint8_t {
 
     // Unconditional Jump to Address at HL
     JP_HL = 0xe9,
+
+    // Unconditional Relative Jump
+    JR_N = 0x18,
 };
 
 #endif // __Opcodes_h__

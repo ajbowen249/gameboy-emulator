@@ -284,6 +284,8 @@ int8_t CPU::decodeAndExecute() {
             return I_ConditionalJump(opcode);
         case Opcode::JP_HL:
             return I_JumpToHL();
+        case Opcode::JR_N:
+            return I_UnconditionalRelativeJump();
         case NOP:
         default:
             return 1;
@@ -862,4 +864,13 @@ int8_t CPU::I_ConditionalJump(uint8_t opcode) {
 int8_t CPU::I_JumpToHL() {
     _programCounter = regHL();
     return 4;
+}
+
+int8_t CPU::I_UnconditionalRelativeJump() {
+    auto rawOffset = _memory->read(_programCounter++);
+    auto offset = *reinterpret_cast<int8_t*>(&rawOffset);
+
+    _programCounter += offset;
+
+    return 2;
 }
