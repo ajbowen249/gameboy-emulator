@@ -259,6 +259,21 @@ enum Opcode : uint8_t {
     DEC_DE = 0x1b,
     DEC_HL = 0x2b,
     DEC_SP = 0x3b,
+
+    // Decimal Adjust
+    DAA = 0x27,
+
+    // Complement A
+    CPL = 0x2f,
+
+    // Complement the Carry Flag
+    CCF = 0x3f,
+
+    // Set the Carry Flag
+    SCF = 0x37,
+
+    // No-Op
+    NOP = 0x00,
 };
 
 #endif // __Opcodes_h__

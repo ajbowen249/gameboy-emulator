@@ -267,6 +267,17 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::DEC_HL:
         case Opcode::DEC_SP:
             return I_16BitDecrement(opcode);
+        case Opcode::DAA:
+            return I_DecimalAdjust();
+        case Opcode::CPL:
+            return I_ComplementA();
+        case Opcode::CCF:
+            return I_ComplementCarry();
+        case Opcode::SCF:
+            return I_SetCarry();
+        case NOP:
+        default:
+            return 1;
     }
 }
 
@@ -561,7 +572,7 @@ int8_t CPU::I_8BitSubtract(uint8_t opcode) {
     zFlag(result == 0);
     nFlag(true);
     hFlag(((_regA & 0x0f) - (operand & 0x0f) - carryValue) < 0);
-    cFlag(result > _regA || result > operand);
+    cFlag(result > _regA);
 
     _regA = result;
 
@@ -759,4 +770,57 @@ int8_t CPU::I_16BitDecrement(uint8_t opcode) {
     }
 
     return 2;
+}
+
+// Using implementation from
+// https://forums.nesdev.com/viewtopic.php?f=20&t=15944#p196282
+int8_t CPU::I_DecimalAdjust() {
+    if (!nFlag()) {
+        if (cFlag() || _regA > 0x99) {
+            _regA += 0x60;
+            cFlag(true);
+        }
+
+        if (hFlag() || (_regA & 0x0f) > 0x09) {
+            _regA += 0x6;
+        }
+    } else {
+        if (cFlag()) {
+            _regA -= 0x60;
+        }
+
+        if (hFlag()) {
+            _regA -= 0x6;
+        }
+    }
+
+    zFlag(_regA == 0);
+    hFlag(false);
+
+    return 1;
+}
+
+int8_t CPU::I_ComplementA() {
+    _regA = ~_regA;
+
+    nFlag(true);
+    hFlag(true);
+
+    return 1;
+}
+
+int8_t CPU::I_ComplementCarry() {
+    nFlag(false);
+    hFlag(false);
+    cFlag(!cFlag());
+
+    return 1;
+}
+
+int8_t CPU::I_SetCarry() {
+    nFlag(false);
+    hFlag(false);
+    cFlag(true);
+
+    return 1;
 }

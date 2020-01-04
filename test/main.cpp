@@ -1263,3 +1263,73 @@ TEST_CASE("16-bit decrement") {
     CHECK(testCPU._stackPointer == 0x0002);
 }
 
+TEST_CASE("DAA") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LD_A_n,
+        0x05, // 5 is the same in BCD and hex
+        Opcode::ADD_A_A,
+        Opcode::DAA,
+        Opcode::LD_A_n,
+        0x20, // Treat this as BCD 20, not decimal 32
+        Opcode::LD_B_n,
+        0x01,
+        Opcode::SUB_B, // Should put us at 0x1f, but we want 0x19
+        Opcode::DAA,
+    });
+
+    // 0x05 + 0x05 = 0x0A. Decimal adjust should be BCD 10 (0x10)
+
+    CLOCK(16);
+    CHECK(testCPU._regA == 0x10);
+
+    CLOCK(24);
+    CHECK(testCPU._regA == 0x19);
+}
+
+TEST_CASE("complement A") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LD_A_n,
+        0xf0,
+        Opcode::CPL,
+        Opcode::CPL,
+    });
+
+    CLOCK(12);
+    CHECK(testCPU._regA == 0x0f);
+    CLOCK(4);
+    CHECK(testCPU._regA == 0xf0);
+}
+
+TEST_CASE("complement carry") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::CCF,
+        Opcode::CCF,
+    });
+
+    testCPU.cFlag(true);
+
+    CLOCK(4);
+    CHECK(testCPU.cFlag() == false);
+
+    CLOCK(4);
+    CHECK(testCPU.cFlag() == true);
+}
+
+TEST_CASE("set carry") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::SCF,
+    });
+
+    testCPU.cFlag(false);
+
+    CLOCK(4);
+    CHECK(testCPU.cFlag() == true);
+}
