@@ -277,6 +277,11 @@ int8_t CPU::decodeAndExecute() {
             return I_SetCarry();
         case Opcode::JP_NN:
             return I_UnconditionalJump();
+        case Opcode::JP_NZ_NN:
+        case Opcode::JP_Z_NN:
+        case Opcode::JP_NC_NN:
+        case Opcode::JP_C_NN:
+            return I_ConditionalJump(opcode);
         case NOP:
         default:
             return 1;
@@ -829,5 +834,25 @@ int8_t CPU::I_SetCarry() {
 
 int8_t CPU::I_UnconditionalJump() {
     _programCounter = _memory->readLI(_programCounter);
+    return 3;
+}
+
+int8_t CPU::I_ConditionalJump(uint8_t opcode) {
+    uint16_t newAddress = _memory->readLI(_programCounter);
+    _programCounter += 2;
+
+    bool condition = false;
+
+    switch(opcode) {
+        case Opcode::JP_NZ_NN: condition = !zFlag(); break;
+        case Opcode::JP_Z_NN: condition = zFlag(); break;
+        case Opcode::JP_NC_NN: condition = !cFlag(); break;
+        case Opcode::JP_C_NN: condition = cFlag(); break;
+    }
+
+    if (condition) {
+        _programCounter = newAddress;
+    }
+
     return 3;
 }

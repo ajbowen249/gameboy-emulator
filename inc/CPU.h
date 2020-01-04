@@ -109,6 +109,7 @@ private:
     int8_t I_ComplementCarry();
     int8_t I_SetCarry();
     int8_t I_UnconditionalJump();
+    int8_t I_ConditionalJump(uint8_t opcode);
 };
 
 #endif // __CPU_h_

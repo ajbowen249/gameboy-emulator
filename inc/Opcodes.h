@@ -277,6 +277,12 @@ enum Opcode : uint8_t {
 
     // Unconditional Jump
     JP_NN = 0xc3,
+
+    // Conditional Jumps
+    JP_NZ_NN = 0xc2,
+    JP_Z_NN  = 0xca,
+    JP_NC_NN = 0xd2,
+    JP_C_NN  = 0xda,
 };
 
 #endif // __Opcodes_h__
