@@ -1320,3 +1320,16 @@ TEST_CASE("complement carry") {
     CLOCK(4);
     CHECK(testCPU.cFlag() == true);
 }
+
+TEST_CASE("set carry") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::SCF,
+    });
+
+    testCPU.cFlag(false);
+
+    CLOCK(4);
+    CHECK(testCPU.cFlag() == true);
+}

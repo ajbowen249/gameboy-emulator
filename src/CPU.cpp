@@ -273,6 +273,8 @@ int8_t CPU::decodeAndExecute() {
             return I_ComplementA();
         case Opcode::CCF:
             return I_ComplementCarry();
+        case Opcode::SCF:
+            return I_SetCarry();
     }
 }
 
@@ -808,6 +810,14 @@ int8_t CPU::I_ComplementCarry() {
     nFlag(false);
     hFlag(false);
     cFlag(!cFlag());
+
+    return 1;
+}
+
+int8_t CPU::I_SetCarry() {
+    nFlag(false);
+    hFlag(false);
+    cFlag(true);
 
     return 1;
 }
