@@ -283,6 +283,9 @@ enum Opcode : uint8_t {
     JP_Z_NN  = 0xca,
     JP_NC_NN = 0xd2,
     JP_C_NN  = 0xda,
+
+    // Unconditional Jump to Address at HL
+    JP_HL = 0xe9,
 };
 
 #endif // __Opcodes_h__

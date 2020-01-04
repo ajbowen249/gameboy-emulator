@@ -282,6 +282,8 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::JP_NC_NN:
         case Opcode::JP_C_NN:
             return I_ConditionalJump(opcode);
+        case Opcode::JP_HL:
+            return I_JumpToHL();
         case NOP:
         default:
             return 1;
@@ -855,4 +857,9 @@ int8_t CPU::I_ConditionalJump(uint8_t opcode) {
     }
 
     return 3;
+}
+
+int8_t CPU::I_JumpToHL() {
+    _programCounter = regHL();
+    return 4;
 }

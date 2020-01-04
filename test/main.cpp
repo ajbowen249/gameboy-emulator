@@ -1398,3 +1398,15 @@ TEST_CASE("conditional jump") {
     CLOCK(12);
     CHECK(testCPU._programCounter == INIT_VECTOR + 24);
 }
+
+TEST_CASE("jump to HL") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::JP_HL,
+    });
+
+    testCPU.regHL(0x0102);
+    CLOCK(4);
+    CHECK(testCPU._programCounter == 0x0102);
+}
