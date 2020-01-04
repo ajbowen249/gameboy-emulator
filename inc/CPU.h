@@ -106,6 +106,7 @@ private:
     int8_t I_16BitDecrement(uint8_t opcode);
     int8_t I_DecimalAdjust();
     int8_t I_ComplementA();
+    int8_t I_ComplementCarry();
 };
 
 #endif // __CPU_h_

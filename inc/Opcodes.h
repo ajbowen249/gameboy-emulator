@@ -265,6 +265,9 @@ enum Opcode : uint8_t {
 
     // Complement A
     CPL = 0x2f,
+
+    // Complement the Carry Flag
+    CCF = 0x3f,
 };
 
 #endif // __Opcodes_h__

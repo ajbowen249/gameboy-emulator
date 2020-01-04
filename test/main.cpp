@@ -1303,3 +1303,20 @@ TEST_CASE("complement A") {
     CLOCK(4);
     CHECK(testCPU._regA == 0xf0);
 }
+
+TEST_CASE("complement carry") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::CCF,
+        Opcode::CCF,
+    });
+
+    testCPU.cFlag(true);
+
+    CLOCK(4);
+    CHECK(testCPU.cFlag() == false);
+
+    CLOCK(4);
+    CHECK(testCPU.cFlag() == true);
+}
