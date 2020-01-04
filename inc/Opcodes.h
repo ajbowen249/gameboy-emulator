@@ -262,6 +262,9 @@ enum Opcode : uint8_t {
 
     // Decimal Adjust
     DAA = 0x27,
+
+    // Complement A
+    CPL = 0x2f,
 };
 
 #endif // __Opcodes_h__

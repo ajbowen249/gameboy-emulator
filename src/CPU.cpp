@@ -269,6 +269,8 @@ int8_t CPU::decodeAndExecute() {
             return I_16BitDecrement(opcode);
         case Opcode::DAA:
             return I_DecimalAdjust();
+        case Opcode::CPL:
+            return I_ComplementA();
     }
 }
 
@@ -787,6 +789,15 @@ int8_t CPU::I_DecimalAdjust() {
 
     zFlag(_regA == 0);
     hFlag(false);
+
+    return 1;
+}
+
+int8_t CPU::I_ComplementA() {
+    _regA = ~_regA;
+
+    nFlag(true);
+    hFlag(true);
 
     return 1;
 }

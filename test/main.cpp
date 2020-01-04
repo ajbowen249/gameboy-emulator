@@ -1287,3 +1287,19 @@ TEST_CASE("DAA") {
     CLOCK(24);
     CHECK(testCPU._regA == 0x19);
 }
+
+TEST_CASE("complement A") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::LD_A_n,
+        0xf0,
+        Opcode::CPL,
+        Opcode::CPL,
+    });
+
+    CLOCK(12);
+    CHECK(testCPU._regA == 0x0f);
+    CLOCK(4);
+    CHECK(testCPU._regA == 0xf0);
+}
