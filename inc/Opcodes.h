@@ -259,6 +259,9 @@ enum Opcode : uint8_t {
     DEC_DE = 0x1b,
     DEC_HL = 0x2b,
     DEC_SP = 0x3b,
+
+    // Decimal Adjust
+    DAA = 0x27,
 };
 
 #endif // __Opcodes_h__
