@@ -1053,13 +1053,13 @@ int8_t CPU::I_ExecCBGroup() {
         if (lowNibble <= 0x07) {
             RotateLeft(dataPtr, true);
         } else {
-            // TODO: RRC
+            RotateRight(dataPtr, true);
         }
     } else if (highNibble == 0x10) {
         if (lowNibble <= 0x07) {
             RotateLeft(dataPtr, false);
         } else {
-            // TODO: RR
+            RotateRight(dataPtr, false);
         }
     } else if (highNibble == 0x20) {
         if (lowNibble <= 0x07) {
@@ -1103,6 +1103,21 @@ void CPU::RotateLeft(uint8_t* value, bool withCarry) {
     }
 
     cFlag(b7Set);
+
+    zFlag(*value == 0);
+    nFlag(false);
+    hFlag(false);
+}
+
+void CPU::RotateRight(uint8_t* value, bool withCarry) {
+    const bool b0Set = (*value & 0x01) != 0;
+
+    (*value) >>= 1;
+    if ((!withCarry && cFlag()) || (withCarry && b0Set)) {
+        (*value) |= 0x80;
+    }
+
+    cFlag(b0Set);
 
     zFlag(*value == 0);
     nFlag(false);

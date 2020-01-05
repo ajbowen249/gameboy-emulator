@@ -128,6 +128,7 @@ private:
     int8_t I_ExecCBGroup();
 
     void RotateLeft(uint8_t* value, bool withCarry);
+    void RotateRight(uint8_t* value, bool withCarry);
 };
 
 #endif // __CPU_h_

@@ -1687,7 +1687,7 @@ TEST_CASE("rlc") {
 
     simpleMemory->write(0x0000, 0x0f);
 
-    testCPU._regB = 0xAA;
+    testCPU._regB = 0xaa;
     testCPU.cFlag(true);
 
     CLOCK(8);
@@ -1697,7 +1697,7 @@ TEST_CASE("rlc") {
 
     CLOCK(8);
 
-    CHECK(testCPU._regB == 0xAA);
+    CHECK(testCPU._regB == 0xaa);
     CHECK(testCPU.cFlag() == false);
 
     testCPU.regHL(0x0000);
@@ -1723,7 +1723,7 @@ TEST_CASE("rl") {
 
     simpleMemory->write(0x0000, 0x0f);
 
-    testCPU._regB = 0xAA;
+    testCPU._regB = 0xaa;
     testCPU.cFlag(false);
 
     CLOCK(8);
@@ -1733,7 +1733,7 @@ TEST_CASE("rl") {
 
     CLOCK(8);
 
-    CHECK(testCPU._regB == 0xA9);
+    CHECK(testCPU._regB == 0xa9);
     CHECK(testCPU.cFlag() == false);
 
     testCPU.regHL(0x0000);
@@ -1743,4 +1743,76 @@ TEST_CASE("rl") {
 
     CHECK(simpleMemory->read(0x0000) == 0x1f);
     CHECK(testCPU.cFlag() == false);
+}
+
+TEST_CASE("rrc") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x09,
+        Opcode::PREFIX_CB,
+        0x09,
+        Opcode::PREFIX_CB,
+        0x0e,
+    });
+
+    simpleMemory->write(0x0000, 0x0f);
+
+    testCPU._regC = 0x55;
+    testCPU.cFlag(false);
+
+    CLOCK(8);
+
+    CHECK(testCPU._regC == 0xaa);
+    CHECK(testCPU.cFlag() == true);
+
+    CLOCK(8);
+
+    CHECK(testCPU._regC == 0x55);
+    CHECK(testCPU.cFlag() == false);
+
+    testCPU.regHL(0x0000);
+    testCPU.cFlag(false);
+
+    CLOCK(16);
+
+    CHECK(simpleMemory->read(0x0000) == 0x87);
+    CHECK(testCPU.cFlag() == true);
+}
+
+TEST_CASE("rr") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x19,
+        Opcode::PREFIX_CB,
+        0x19,
+        Opcode::PREFIX_CB,
+        0x1e,
+    });
+
+    simpleMemory->write(0x0000, 0x0f);
+
+    testCPU._regC = 0xaa;
+    testCPU.cFlag(true);
+
+    CLOCK(8);
+
+    CHECK(testCPU._regC == 0xd5);
+    CHECK(testCPU.cFlag() == false);
+
+    CLOCK(8);
+
+    CHECK(testCPU._regC == 0x6a);
+    CHECK(testCPU.cFlag() == true);
+
+    testCPU.regHL(0x0000);
+    testCPU.cFlag(false);
+
+    CLOCK(16);
+
+    CHECK(simpleMemory->read(0x0000) == 0x07);
+    CHECK(testCPU.cFlag() == true);
 }
