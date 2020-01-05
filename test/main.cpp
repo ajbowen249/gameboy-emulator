@@ -1816,3 +1816,17 @@ TEST_CASE("rr") {
     CHECK(simpleMemory->read(0x0000) == 0x07);
     CHECK(testCPU.cFlag() == true);
 }
+
+TEST_CASE("sla") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x22,
+    });
+
+    testCPU._regD = 0xcd;
+
+    CLOCK(8);
+    CHECK(testCPU._regD == 0x9a);
+}

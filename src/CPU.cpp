@@ -1063,7 +1063,7 @@ int8_t CPU::I_ExecCBGroup() {
         }
     } else if (highNibble == 0x20) {
         if (lowNibble <= 0x07) {
-            // TODO: SLA
+            ShiftLeft(dataPtr);
         } else {
             // TODO: SRA
         }
@@ -1122,4 +1122,15 @@ void CPU::RotateRight(uint8_t* value, bool withCarry) {
     zFlag(*value == 0);
     nFlag(false);
     hFlag(false);
+}
+
+void CPU::ShiftLeft(uint8_t* value) {
+    const bool b7Set = (*value & 0x80) != 0;
+
+    (*value) <<= 1;
+
+    zFlag((*value) == 0);
+    nFlag(false);
+    hFlag(false);
+    cFlag(b7Set);
 }
