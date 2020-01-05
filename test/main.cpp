@@ -1576,3 +1576,18 @@ TEST_CASE("RST") {
     CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 2);
     CHECK(simpleMemory->readLI(testCPU._stackPointer) == INIT_VECTOR + 1);
 }
+
+TEST_CASE("return") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::CALL_NN,
+        0x04,
+        0x01,
+        Opcode::NOP,
+        Opcode::RET,
+    });
+
+    CLOCK(20);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 3);
+}

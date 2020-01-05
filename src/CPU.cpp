@@ -307,6 +307,8 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::RST_30:
         case Opcode::RST_38:
             return I_RST(opcode);
+        case Opcode::RET:
+            return I_Return();
         case NOP:
         default:
             return 1;
@@ -958,4 +960,13 @@ int8_t CPU::I_RST(uint8_t opcode) {
     _programCounter = address;
 
     return 4;
+}
+
+int8_t CPU::I_Return() {
+    uint16_t address = _memory->readLI(_stackPointer);
+    _stackPointer += 2;
+
+    _programCounter = address;
+
+    return 2;
 }
