@@ -10,6 +10,7 @@ add_definitions(
 
 add_executable(
     gameboyEmulator
+    src/Cartridge.cpp
     src/CPU.cpp
     src/main.cpp
     src/Log.cpp
@@ -27,6 +28,7 @@ target_link_libraries(
 
 add_executable(
     tests
+    src/Cartridge.cpp
     src/CPU.cpp
     src/Log.cpp
     src/Motherboard.cpp

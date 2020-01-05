@@ -1,6 +1,7 @@
 #ifndef __GameboyMotherboard_H__
 #define __GameboyMotherboard_H__
 
+#include "Cartridge.h"
 #include "Motherboard.h"
 
 #define length(name) (name##_END - name##_START) + 0x0001
@@ -60,14 +61,13 @@ public:
     uint8_t read(uint16_t addr) override;
     void write(uint16_t addr, uint8_t value) override;
 
+    void setCartridge(Cartridge::Ptr cartridge);
+
 private:
     // Video Memory
     uint8_t _tileRam[TILE_RAM_LENGTH];
     uint8_t _bgData1[BACKGROUND_DATA_1_LENGTH];
     uint8_t _bgData2[BACKGROUND_DATA_2_LENGTH];
-
-    // IRL on the cartridge itself, but since it's writeable we'll keep it here
-    uint8_t _cartridgeRam[CART_RAM_LENGTH];
 
     // General-purpose internal RAM
     uint8_t _workRam[WORK_RAM_LENGTH];
@@ -79,6 +79,8 @@ private:
     uint8_t _highRam[HIGH_RAM_LENGTH];
 
     uint8_t _interruptEnableRegister;
+
+    Cartridge::Ptr _cartridge;
 };
 
 #endif // __GameboyMotherboard_H__
