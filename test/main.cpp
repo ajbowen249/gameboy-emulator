@@ -1826,7 +1826,50 @@ TEST_CASE("sla") {
     });
 
     testCPU._regD = 0xcd;
+    testCPU.cFlag(false);
 
     CLOCK(8);
     CHECK(testCPU._regD == 0x9a);
+    CHECK(testCPU.cFlag() == true);
+}
+
+TEST_CASE("srl") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x3b,
+    });
+
+    testCPU._regE = 0xff;
+    testCPU.cFlag(false);
+
+    CLOCK(8);
+    CHECK(testCPU._regE == 0x7f);
+    CHECK(testCPU.cFlag() == true);
+}
+
+TEST_CASE("sra") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x2b,
+        Opcode::PREFIX_CB,
+        0x2b,
+    });
+
+    testCPU._regE = 0xff;
+    testCPU.cFlag(false);
+
+    CLOCK(8);
+    CHECK(testCPU._regE == 0xff);
+    CHECK(testCPU.cFlag() == true);
+
+    testCPU._regE = 0x7f;
+    testCPU.cFlag(false);
+
+    CLOCK(8);
+    CHECK(testCPU._regE == 0x3f);
+    CHECK(testCPU.cFlag() == true);
 }

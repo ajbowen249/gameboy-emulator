@@ -1065,13 +1065,13 @@ int8_t CPU::I_ExecCBGroup() {
         if (lowNibble <= 0x07) {
             ShiftLeft(dataPtr);
         } else {
-            // TODO: SRA
+            ShiftRight(dataPtr, true);
         }
     } else if (highNibble == 0x30) {
         if (lowNibble <= 0x07) {
             // TODO: SWAP
         } else {
-            // TODO: SRL
+            ShiftRight(dataPtr, false);
         }
     } else {
         // Bitwise instructions start at 0x40. They increment bit index every 8
@@ -1133,4 +1133,20 @@ void CPU::ShiftLeft(uint8_t* value) {
     nFlag(false);
     hFlag(false);
     cFlag(b7Set);
+}
+
+void CPU::ShiftRight(uint8_t* value, bool preserveMSB) {
+    const bool b0Set = (*value & 0x01) != 0;
+    const bool b7Set = (*value & 0x80) != 0;
+
+    (*value) >>= 1;
+
+    if (preserveMSB && b7Set) {
+        (*value) |= 0x80;
+    }
+
+    zFlag((*value) == 0);
+    nFlag(false);
+    hFlag(false);
+    cFlag(b0Set);
 }

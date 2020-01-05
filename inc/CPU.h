@@ -130,6 +130,7 @@ private:
     void RotateLeft(uint8_t* value, bool withCarry);
     void RotateRight(uint8_t* value, bool withCarry);
     void ShiftLeft(uint8_t* value);
+    void ShiftRight(uint8_t* value, bool preserveMSB);
 };
 
 #endif // __CPU_h_
