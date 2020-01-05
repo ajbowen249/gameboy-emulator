@@ -291,6 +291,8 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::JR_NC_N:
         case Opcode::JR_C_N:
             return I_ConditionalRelativeJump(opcode);
+        case Opcode::CALL_NN:
+            return I_Call();
         case NOP:
         default:
             return 1;
@@ -898,4 +900,16 @@ int8_t CPU::I_ConditionalRelativeJump(uint8_t opcode) {
     }
 
     return 2;
+}
+
+int8_t CPU::I_Call() {
+    auto address = _memory->readLI(_programCounter);
+    _programCounter += 2;
+
+    _stackPointer -= 2;
+    _memory->writeLI(_stackPointer, _programCounter);
+
+    _programCounter = address;
+
+    return 3;
 }

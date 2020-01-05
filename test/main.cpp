@@ -1483,3 +1483,19 @@ TEST_CASE("conditional relative jump") {
     CLOCK(8);
     CHECK(testCPU._programCounter == INIT_VECTOR + 16);
 }
+
+TEST_CASE("call") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::CALL_NN,
+        0x02,
+        0x01,
+    });
+
+    CLOCK(12);
+
+    CHECK(testCPU._programCounter == 0x0102);
+    CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 2);
+    CHECK(simpleMemory->readLI(INIT_STACK_POINTER - 2) == INIT_VECTOR + 3);
+}

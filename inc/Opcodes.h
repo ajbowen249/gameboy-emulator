@@ -295,6 +295,9 @@ enum Opcode : uint8_t {
     JR_Z_N  = 0x28,
     JR_NC_N = 0x30,
     JR_C_N  = 0x38,
+
+    // Call
+    CALL_NN = 0xcd,
 };
 
 #endif // __Opcodes_h__
