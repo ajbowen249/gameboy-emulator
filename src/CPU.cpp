@@ -309,6 +309,11 @@ int8_t CPU::decodeAndExecute() {
             return I_RST(opcode);
         case Opcode::RET:
             return I_Return();
+        case Opcode::RET_NZ:
+        case Opcode::RET_Z:
+        case Opcode::RET_NC:
+        case Opcode::RET_C:
+            return I_ConditionalReturn(opcode);
         case NOP:
         default:
             return 1;
@@ -967,6 +972,19 @@ int8_t CPU::I_Return() {
     _stackPointer += 2;
 
     _programCounter = address;
+
+    return 2;
+}
+
+int8_t CPU::I_ConditionalReturn(uint8_t opcode) {
+    BRANCH_CONDITION(RET,);
+
+    if (condition) {
+        uint16_t address = _memory->readLI(_stackPointer);
+        _stackPointer += 2;
+
+        _programCounter = address;
+    }
 
     return 2;
 }

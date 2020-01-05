@@ -317,6 +317,12 @@ enum Opcode : uint8_t {
 
     // Return
     RET = 0xc9,
+
+    // Conditional Return
+    RET_NZ = 0xc0,
+    RET_Z  = 0xc8,
+    RET_NC = 0xd0,
+    RET_C  = 0xd8,
 };
 
 #endif // __Opcodes_h__

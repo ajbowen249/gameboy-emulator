@@ -1591,3 +1591,23 @@ TEST_CASE("return") {
     CLOCK(20);
     CHECK(testCPU._programCounter == INIT_VECTOR + 3);
 }
+
+TEST_CASE("conditional return") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::CALL_NN,
+        0x04,
+        0x01,
+        Opcode::RET_NC,
+        Opcode::RET_C,
+    });
+
+    testCPU.cFlag(true);
+
+    CLOCK(20);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 3);
+
+    CLOCK(8); // Should not have tried to return as C is still true
+    CHECK(testCPU._programCounter == INIT_VECTOR + 4);
+}

@@ -117,6 +117,7 @@ private:
     int8_t I_ConditionalCall(uint8_t opcode);
     int8_t I_RST(uint8_t opcode);
     int8_t I_Return();
+    int8_t I_ConditionalReturn(uint8_t opcode);
 };
 
 #endif // __CPU_h_
