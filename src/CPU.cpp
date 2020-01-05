@@ -15,6 +15,8 @@ void CPU::reset() {
     _stackPointer = INIT_STACK_POINTER;
     _flags = 0;
     _interruptsEnabled = true;
+    _isHalted = false;
+    _isStopped = false;
 
     _awaitingClockCycles = CLOCK_CYCLES_PER_MACHINE_CYCLE;
     _awaitingMachineCycles = 0;
@@ -316,6 +318,10 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::RET_NC:
         case Opcode::RET_C:
             return I_ConditionalReturn(opcode);
+        case Opcode::HALT:
+            return I_Halt();
+        case Opcode::STOP:
+            return I_Stop();
         case NOP:
         default:
             return 1;
@@ -993,4 +999,18 @@ int8_t CPU::I_ConditionalReturn(uint8_t opcode) {
     }
 
     return 2;
+}
+
+int8_t CPU::I_Halt() {
+    _isHalted = true;
+    return 1;
+}
+
+int8_t CPU::I_Stop() {
+    _isStopped = true;
+
+    // For some reason, this takes an extra byte.
+    _programCounter++;
+
+    return 1;
 }

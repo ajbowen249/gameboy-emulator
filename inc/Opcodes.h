@@ -326,6 +326,12 @@ enum Opcode : uint8_t {
 
     // Return and enable interrupts
     RETI = 0xd9,
+
+    // Halt
+    HALT = 0x76,
+
+    // Stop
+    STOP = 0x10,
 };
 
 #endif // __Opcodes_h__

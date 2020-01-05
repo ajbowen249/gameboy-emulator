@@ -1629,3 +1629,29 @@ TEST_CASE("return and enable interrupts") {
     CHECK(testCPU._programCounter == INIT_VECTOR + 3);
     CHECK(testCPU._interruptsEnabled == true);
 }
+
+TEST_CASE("halt") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::HALT,
+    });
+
+    CLOCK(4);
+
+    CHECK(testCPU._isHalted == true);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 1);
+}
+
+TEST_CASE("stop") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::STOP,
+    });
+
+    CLOCK(4);
+
+    CHECK(testCPU._isStopped == true);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 2);
+}

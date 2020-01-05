@@ -53,6 +53,8 @@ public:
     uint8_t _flags;
 
     bool _interruptsEnabled;
+    bool _isHalted;  // Stop until any interrupt.
+    bool _isStopped; // Stop until button press.
 
     inline uint16_t regAF() const { RET_COMBO_REGISTER(_regA, _flags); }
     inline uint16_t regBC() const { RET_COMBO_REGISTER(_regB, _regC); }
@@ -120,6 +122,8 @@ private:
     int8_t I_RST(uint8_t opcode);
     int8_t I_Return(uint8_t opcode);
     int8_t I_ConditionalReturn(uint8_t opcode);
+    int8_t I_Halt();
+    int8_t I_Stop();
 };
 
 #endif // __CPU_h_
