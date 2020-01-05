@@ -286,6 +286,11 @@ int8_t CPU::decodeAndExecute() {
             return I_JumpToHL();
         case Opcode::JR_N:
             return I_UnconditionalRelativeJump();
+        case Opcode::JR_NZ_N:
+        case Opcode::JR_Z_N:
+        case Opcode::JR_NC_N:
+        case Opcode::JR_C_N:
+            return I_ConditionalRelativeJump(opcode);
         case NOP:
         default:
             return 1;
@@ -871,6 +876,26 @@ int8_t CPU::I_UnconditionalRelativeJump() {
     auto offset = *reinterpret_cast<int8_t*>(&rawOffset);
 
     _programCounter += offset;
+
+    return 2;
+}
+
+int8_t CPU::I_ConditionalRelativeJump(uint8_t opcode) {
+    auto rawOffset = _memory->read(_programCounter++);
+    auto offset = *reinterpret_cast<int8_t*>(&rawOffset);
+
+    bool condition = false;
+
+    switch(opcode) {
+        case Opcode::JR_NZ_N: condition = !zFlag(); break;
+        case Opcode::JR_Z_N: condition = zFlag(); break;
+        case Opcode::JR_NC_N: condition = !cFlag(); break;
+        case Opcode::JR_C_N: condition = cFlag(); break;
+    }
+
+    if (condition) {
+        _programCounter += offset;
+    }
 
     return 2;
 }

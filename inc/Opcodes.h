@@ -289,6 +289,12 @@ enum Opcode : uint8_t {
 
     // Unconditional Relative Jump
     JR_N = 0x18,
+
+    // Conditional Relative Jumps
+    JR_NZ_N = 0x20,
+    JR_Z_N  = 0x28,
+    JR_NC_N = 0x30,
+    JR_C_N  = 0x38,
 };
 
 #endif // __Opcodes_h__
