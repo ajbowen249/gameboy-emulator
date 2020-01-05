@@ -1051,13 +1051,13 @@ int8_t CPU::I_ExecCBGroup() {
 
     if (highNibble == 0x00) {
         if (lowNibble <= 0x07) {
-            // TODO: RLC
+            RotateLeft(dataPtr, true);
         } else {
             // TODO: RRC
         }
     } else if (highNibble == 0x10) {
         if (lowNibble <= 0x07) {
-            // TODO: RL
+            RotateLeft(dataPtr, false);
         } else {
             // TODO: RR
         }
@@ -1092,4 +1092,19 @@ int8_t CPU::I_ExecCBGroup() {
     }
 
     return dataIsInRegister ? 2 : 4;
+}
+
+void CPU::RotateLeft(uint8_t* value, bool withCarry) {
+    const bool b7Set = (*value & 0x80) != 0;
+
+    (*value) <<= 1;
+    if ((!withCarry && cFlag()) || (withCarry && b7Set)) {
+        (*value) |= 0x01;
+    }
+
+    cFlag(b7Set);
+
+    zFlag(*value == 0);
+    nFlag(false);
+    hFlag(false);
 }

@@ -1672,3 +1672,75 @@ TEST_CASE("interrupt enable/disable") {
     CLOCK(4);
     CHECK(testCPU._interruptsEnabled == true);
 }
+
+TEST_CASE("rlc") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x00,
+        Opcode::PREFIX_CB,
+        0x00,
+        Opcode::PREFIX_CB,
+        0x06,
+    });
+
+    simpleMemory->write(0x0000, 0x0f);
+
+    testCPU._regB = 0xAA;
+    testCPU.cFlag(true);
+
+    CLOCK(8);
+
+    CHECK(testCPU._regB == 0x55);
+    CHECK(testCPU.cFlag() == true);
+
+    CLOCK(8);
+
+    CHECK(testCPU._regB == 0xAA);
+    CHECK(testCPU.cFlag() == false);
+
+    testCPU.regHL(0x0000);
+    testCPU.cFlag(true);
+
+    CLOCK(16);
+
+    CHECK(simpleMemory->read(0x0000) == 0x1e);
+    CHECK(testCPU.cFlag() == false);
+}
+
+TEST_CASE("rl") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x10,
+        Opcode::PREFIX_CB,
+        0x10,
+        Opcode::PREFIX_CB,
+        0x16,
+    });
+
+    simpleMemory->write(0x0000, 0x0f);
+
+    testCPU._regB = 0xAA;
+    testCPU.cFlag(false);
+
+    CLOCK(8);
+
+    CHECK(testCPU._regB == 0x54);
+    CHECK(testCPU.cFlag() == true);
+
+    CLOCK(8);
+
+    CHECK(testCPU._regB == 0xA9);
+    CHECK(testCPU.cFlag() == false);
+
+    testCPU.regHL(0x0000);
+    testCPU.cFlag(true);
+
+    CLOCK(16);
+
+    CHECK(simpleMemory->read(0x0000) == 0x1f);
+    CHECK(testCPU.cFlag() == false);
+}
