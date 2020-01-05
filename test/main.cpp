@@ -1892,3 +1892,28 @@ TEST_CASE("swap") {
     CHECK(testCPU._regH == 0x21);
     CHECK(testCPU._regL == 0xba);
 }
+
+TEST_CASE("bit") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x40,
+        Opcode::PREFIX_CB,
+        0x7f,
+        Opcode::PREFIX_CB,
+        0x59,
+        Opcode::PREFIX_CB,
+        0x6a,
+    });
+
+    testCPU._regB = 0xfe;
+    testCPU._regA = 0x7f;
+    testCPU._regC = 0xf7;
+    testCPU._regD = 0x20;
+
+    for (int i = 0; i < 4; i++) {
+        CLOCK(8);
+        CHECK(testCPU.zFlag() == (i != 3));
+    }
+}
