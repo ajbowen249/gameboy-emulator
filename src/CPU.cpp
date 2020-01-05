@@ -1083,7 +1083,7 @@ int8_t CPU::I_ExecCBGroup() {
         } else if (highNibble >= 0x80 && highNibble <= 0xB0) {
             // TODO: RES
         } else {
-            // TODO: SET
+            SetBit(dataPtr, bitIndex);
         }
     }
 
@@ -1166,4 +1166,9 @@ void CPU::TestBit(uint8_t* value, uint8_t bitIndex) {
     zFlag(((*value) & mask) == 0);
     nFlag(false);
     hFlag(true);
+}
+
+void CPU::SetBit(uint8_t* value, uint8_t bitIndex) {
+    uint8_t mask = 0x01 << bitIndex;
+    (*value) |= mask;
 }

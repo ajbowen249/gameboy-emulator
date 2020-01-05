@@ -1917,3 +1917,30 @@ TEST_CASE("bit") {
         CHECK(testCPU.zFlag() == (i != 3));
     }
 }
+
+TEST_CASE("set") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0xc0,
+        Opcode::PREFIX_CB,
+        0xff,
+        Opcode::PREFIX_CB,
+        0xda,
+        Opcode::PREFIX_CB,
+        0xeb,
+    });
+
+    testCPU._regB = 0x00;
+    testCPU._regA = 0x00;
+    testCPU._regD = 0x00;
+    testCPU._regE = 0x00;
+
+    CLOCK(32);
+
+    CHECK(testCPU._regB == 0x01);
+    CHECK(testCPU._regA == 0x80);
+    CHECK(testCPU._regD == 0x08);
+    CHECK(testCPU._regE == 0x20);
+}

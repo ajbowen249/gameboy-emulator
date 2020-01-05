@@ -132,7 +132,9 @@ private:
     void ShiftLeft(uint8_t* value);
     void ShiftRight(uint8_t* value, bool preserveMSB);
     void Swap(uint8_t* value);
+
     void TestBit(uint8_t* value, uint8_t bitIndex);
+    void SetBit(uint8_t* value, uint8_t bitIndex);
 };
 
 #endif // __CPU_h_
