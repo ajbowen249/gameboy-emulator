@@ -135,6 +135,7 @@ private:
 
     void TestBit(uint8_t* value, uint8_t bitIndex);
     void SetBit(uint8_t* value, uint8_t bitIndex);
+    void ResetBit(uint8_t* value, uint8_t bitIndex);
 };
 
 #endif // __CPU_h_

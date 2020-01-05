@@ -1944,3 +1944,30 @@ TEST_CASE("set") {
     CHECK(testCPU._regD == 0x08);
     CHECK(testCPU._regE == 0x20);
 }
+
+TEST_CASE("reset") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x80,
+        Opcode::PREFIX_CB,
+        0xbf,
+        Opcode::PREFIX_CB,
+        0x9a,
+        Opcode::PREFIX_CB,
+        0xab,
+    });
+
+    testCPU._regB = 0xff;
+    testCPU._regA = 0xff;
+    testCPU._regD = 0xff;
+    testCPU._regE = 0xff;
+
+    CLOCK(32);
+
+    CHECK(testCPU._regB == 0xfe);
+    CHECK(testCPU._regA == 0x7f);
+    CHECK(testCPU._regD == 0xf7);
+    CHECK(testCPU._regE == 0xdf);
+}
