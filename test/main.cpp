@@ -138,7 +138,7 @@ TEST_CASE("load immediate") {
 
     // This program sets A, through L to 1, through 7.
     // No flags should be impacted.
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LD_A_n,
         0x01,
         Opcode::LD_B_n,
@@ -194,7 +194,7 @@ TEST_CASE("load immediate") {
     testCPU._regH = 0x05; \
     testCPU._regL = 0x06; \
     \
-    simpleMemory->write(INIT_VECTOR, { \
+    simpleMobo->write(INIT_VECTOR, { \
         Opcode::LD_##reg##_A, \
         Opcode::LD_##reg##_B, \
         Opcode::LD_##reg##_C, \
@@ -228,7 +228,7 @@ TEST_CASE("transfer register") {
 TEST_CASE("transfter HL to SP") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LD_HL_SP,
     });
 
@@ -242,7 +242,7 @@ TEST_CASE("transfter HL to SP") {
 TEST_CASE("load HL") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LD_A_aHL,
         Opcode::LD_B_aHL,
         Opcode::LD_C_aHL,
@@ -252,7 +252,7 @@ TEST_CASE("load HL") {
         Opcode::LD_L_aHL,
     });
 
-    simpleMemory->write(0x00, 0xAA);
+    simpleMobo->write(0x00, 0xAA);
 
     testCPU._regA = 0x00;
     testCPU._regB = 0x00;
@@ -280,13 +280,13 @@ TEST_CASE("load HL") {
 TEST_CASE("load address to A") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(0x00, {
+    simpleMobo->write(0x00, {
         0x01,
         0x02,
         0x03,
     });
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LD_A_aBC,
         Opcode::LD_A_aDE,
         Opcode::LD_A_aNN,
@@ -311,9 +311,9 @@ TEST_CASE("store register to HL address") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
     const auto testAddress = 0x55aa;
-    simpleMemory->write(testAddress, 0xff);
+    simpleMobo->write(testAddress, 0xff);
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LD_aHL_A,
         Opcode::LD_aHL_B,
         Opcode::LD_aHL_C,
@@ -331,7 +331,7 @@ TEST_CASE("store register to HL address") {
 
     for (int i = 0; i < 5; i++) {
         CLOCK(8);
-        CHECK(simpleMemory->read(testAddress) == (uint8_t)i);
+        CHECK(simpleMobo->read(testAddress) == (uint8_t)i);
     }
 }
 
@@ -339,9 +339,9 @@ TEST_CASE("store literal to HL address") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
     const auto testAddress = 0x55aa;
-    simpleMemory->write(testAddress, 0xff);
+    simpleMobo->write(testAddress, 0xff);
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LD_aHL_n,
         0x12,
     });
@@ -350,13 +350,13 @@ TEST_CASE("store literal to HL address") {
 
     CLOCK(12);
 
-    CHECK(simpleMemory->read(testAddress) == 0x12);
+    CHECK(simpleMobo->read(testAddress) == 0x12);
 }
 
 TEST_CASE("store A to address") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LD_aBC_A,
         Opcode::LD_aDE_A,
         Opcode::LD_aNN_A,
@@ -364,7 +364,7 @@ TEST_CASE("store A to address") {
         0x00,
     });
 
-    simpleMemory->write(0x0000, { 0x00, 0x00, 0x00 });
+    simpleMobo->write(0x0000, { 0x00, 0x00, 0x00 });
 
     testCPU.regBC(0x0000);
     testCPU.regDE(0x0001);
@@ -376,17 +376,17 @@ TEST_CASE("store A to address") {
     testCPU._regA = 0x03;
     CLOCK(16);
 
-    CHECK(simpleMemory->read(0x0000) == 0x01);
-    CHECK(simpleMemory->read(0x0001) == 0x02);
-    CHECK(simpleMemory->read(0x0002) == 0x03);
+    CHECK(simpleMobo->read(0x0000) == 0x01);
+    CHECK(simpleMobo->read(0x0001) == 0x02);
+    CHECK(simpleMobo->read(0x0002) == 0x03);
 }
 
 TEST_CASE("load A indirect from C") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(0xff00, { 0x00, 0x01, 0x02, 0x03 });
+    simpleMobo->write(0xff00, { 0x00, 0x01, 0x02, 0x03 });
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LD_A_afC,
         Opcode::LD_A_afC,
         Opcode::LD_A_afC,
@@ -403,9 +403,9 @@ TEST_CASE("load A indirect from C") {
 TEST_CASE("store A indirect via C") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(0xff00, { 0xff, 0xff, 0xff, 0xff });
+    simpleMobo->write(0xff00, { 0xff, 0xff, 0xff, 0xff });
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LD_afC_A,
         Opcode::LD_afC_A,
         Opcode::LD_afC_A,
@@ -416,21 +416,21 @@ TEST_CASE("store A indirect via C") {
         testCPU._regC = (uint8_t)i;
         testCPU._regA = (uint8_t)i;
         CLOCK(8);
-        CHECK(simpleMemory->read(0xff00 + (uint16_t)i) == (uint8_t)i);
+        CHECK(simpleMobo->read(0xff00 + (uint16_t)i) == (uint8_t)i);
     }
 }
 
 TEST_CASE("decremental HL load") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(0x00, {
+    simpleMobo->write(0x00, {
         0x03,
         0x02,
         0x01,
         0x00,
     });
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LDD_A_aHL,
         Opcode::LDD_A_aHL,
         Opcode::LDD_A_aHL,
@@ -448,14 +448,14 @@ TEST_CASE("decremental HL load") {
 TEST_CASE("incremental HL load") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(0x00, {
+    simpleMobo->write(0x00, {
         0x00,
         0x01,
         0x02,
         0x03,
     });
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LDI_A_aHL,
         Opcode::LDI_A_aHL,
         Opcode::LDI_A_aHL,
@@ -473,9 +473,9 @@ TEST_CASE("incremental HL load") {
 TEST_CASE("decremental HL store") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(0x00, { 0xff, 0xff, 0xff, 0xff });
+    simpleMobo->write(0x00, { 0xff, 0xff, 0xff, 0xff });
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LDD_aHL_A,
         Opcode::LDD_aHL_A,
         Opcode::LDD_aHL_A,
@@ -490,16 +490,16 @@ TEST_CASE("decremental HL store") {
     CHECK(testCPU.regHL() == 0xffff);
 
     for (int i = 0; i < 4; i++) {
-        CHECK(simpleMemory->read((uint16_t)i) == 0xaa);
+        CHECK(simpleMobo->read((uint16_t)i) == 0xaa);
     }
 }
 
 TEST_CASE("incremental HL store") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(0x00, { 0xff, 0xff, 0xff, 0xff });
+    simpleMobo->write(0x00, { 0xff, 0xff, 0xff, 0xff });
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LDI_aHL_A,
         Opcode::LDI_aHL_A,
         Opcode::LDI_aHL_A,
@@ -514,16 +514,16 @@ TEST_CASE("incremental HL store") {
     CHECK(testCPU.regHL() == 0x04);
 
     for (int i = 0; i < 4; i++) {
-        CHECK(simpleMemory->read((uint16_t)i) == 0xaa);
+        CHECK(simpleMobo->read((uint16_t)i) == 0xaa);
     }
 }
 
 TEST_CASE("load n + ff00") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(0xff00, { 0x00, 0x01, 0x02, 0x03 });
+    simpleMobo->write(0xff00, { 0x00, 0x01, 0x02, 0x03 });
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LDH_A_afN,
         0x00,
         Opcode::LDH_A_afN,
@@ -543,9 +543,9 @@ TEST_CASE("load n + ff00") {
 TEST_CASE("store n + ff00") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(0xff00, { 0xff, 0xff, 0xff, 0xff });
+    simpleMobo->write(0xff00, { 0xff, 0xff, 0xff, 0xff });
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LDH_afN_A,
         0x00,
         Opcode::LDH_afN_A,
@@ -560,14 +560,14 @@ TEST_CASE("store n + ff00") {
     CLOCK(48);
 
     for (int i = 0; i < 4; i++) {
-        CHECK(simpleMemory->read(0xff00 + (uint16_t)i) == 0xaa);
+        CHECK(simpleMobo->read(0xff00 + (uint16_t)i) == 0xaa);
     }
 }
 
 TEST_CASE("load immediate 16-bit") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LD_BC_NN,
         0x02,
         0x01,
@@ -602,12 +602,12 @@ TEST_CASE("load HL with value from stack pointer + n") {
     //       Flag logic assumes reference on StackOverflow is correct.
 
     // 16-bit loads will get these little-endian.
-    simpleMemory->write(0x00, { 0x00, 0x01, 0x02, 0x03, 0x04 });
+    simpleMobo->write(0x00, { 0x00, 0x01, 0x02, 0x03, 0x04 });
 
     int8_t offsetMinus1 = -1;
     uint8_t rawOffsetMinus1 = *reinterpret_cast<uint8_t*>(&offsetMinus1);
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LD_HL_aSPN,
         0x01,
         Opcode::LD_HL_aSPN,
@@ -637,10 +637,10 @@ TEST_CASE("store stack pointer") {
 
     testCPU._stackPointer = 0x55aa;
 
-    simpleMemory->write(0x1122, 0x00);
-    simpleMemory->write(0x1123, 0x00);
+    simpleMobo->write(0x1122, 0x00);
+    simpleMobo->write(0x1123, 0x00);
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LD_aNN_SP,
         0x22, // Little-endian!
         0x11,
@@ -648,8 +648,8 @@ TEST_CASE("store stack pointer") {
 
     CLOCK(20);
 
-    CHECK(simpleMemory->read(0x1122) == 0xaa); // Little-endian!
-    CHECK(simpleMemory->read(0x1123) == 0x55);
+    CHECK(simpleMobo->read(0x1122) == 0xaa); // Little-endian!
+    CHECK(simpleMobo->read(0x1123) == 0x55);
 }
 
 TEST_CASE("push register") {
@@ -660,7 +660,7 @@ TEST_CASE("push register") {
     testCPU.regDE(0x0506);
     testCPU.regHL(0x0708);
 
-    simpleMemory->write(INIT_STACK_POINTER - 6, {
+    simpleMobo->write(INIT_STACK_POINTER - 6, {
         0x00,
         0x00,
         0x00,
@@ -671,7 +671,7 @@ TEST_CASE("push register") {
         0x00,
     });
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::PUSH_AF,
         Opcode::PUSH_BC,
         Opcode::PUSH_DE,
@@ -681,16 +681,16 @@ TEST_CASE("push register") {
     CLOCK(64);
 
     CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 8);
-    CHECK(simpleMemory->readLI(INIT_STACK_POINTER - 2) == 0x0102);
-    CHECK(simpleMemory->readLI(INIT_STACK_POINTER - 4) == 0x0304);
-    CHECK(simpleMemory->readLI(INIT_STACK_POINTER - 6) == 0x0506);
-    CHECK(simpleMemory->readLI(INIT_STACK_POINTER - 8) == 0x0708);
+    CHECK(simpleMobo->readLI(INIT_STACK_POINTER - 2) == 0x0102);
+    CHECK(simpleMobo->readLI(INIT_STACK_POINTER - 4) == 0x0304);
+    CHECK(simpleMobo->readLI(INIT_STACK_POINTER - 6) == 0x0506);
+    CHECK(simpleMobo->readLI(INIT_STACK_POINTER - 8) == 0x0708);
 }
 
 TEST_CASE("pop register") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_STACK_POINTER - 8, {
+    simpleMobo->write(INIT_STACK_POINTER - 8, {
         0x08,
         0x07,
         0x06,
@@ -701,7 +701,7 @@ TEST_CASE("pop register") {
         0x01,
     });
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::POP_HL,
         Opcode::POP_DE,
         Opcode::POP_BC,
@@ -736,7 +736,7 @@ TEST_CASE("push/pop") {
     testCPU.zFlag(true);
     testCPU.cFlag(true);
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::PUSH_BC,
         Opcode::PUSH_AF,
         Opcode::POP_AF,
@@ -763,7 +763,7 @@ TEST_CASE("push/pop") {
 TEST_CASE("add") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::ADD_A_A,
         Opcode::ADD_A_B,
         Opcode::ADD_A_C,
@@ -783,7 +783,7 @@ TEST_CASE("add") {
     testCPU._regE = 5;
     testCPU._regH = 6;
     testCPU._regL = 7;
-    simpleMemory->write(0x0607, 0x08);
+    simpleMobo->write(0x0607, 0x08);
 
     CLOCK(44);
 
@@ -793,7 +793,7 @@ TEST_CASE("add") {
 TEST_CASE("add and check flags") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::ADD_A_A,
         Opcode::ADD_A_B,
         Opcode::ADD_A_B,
@@ -847,7 +847,7 @@ TEST_CASE("add and check flags") {
 TEST_CASE("add with carry") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::ADD_A_B,
         Opcode::ADC_A_C,
         Opcode::ADC_A_D,
@@ -867,7 +867,7 @@ TEST_CASE("add with carry") {
 TEST_CASE("subtract") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::SUB_B,
         Opcode::SUB_C,
         Opcode::SUB_D,
@@ -886,7 +886,7 @@ TEST_CASE("subtract") {
     testCPU._regE = 5;
     testCPU._regH = 6;
     testCPU._regL = 7;
-    simpleMemory->write(0x0607, 0x08);
+    simpleMobo->write(0x0607, 0x08);
 
     CLOCK(40);
 
@@ -896,7 +896,7 @@ TEST_CASE("subtract") {
 TEST_CASE("and") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::AND_A,
         Opcode::AND_B,
         Opcode::AND_C,
@@ -916,7 +916,7 @@ TEST_CASE("and") {
     testCPU._regE = 0x0f;
     testCPU._regH = 0x07;
     testCPU._regL = 0x03;
-    simpleMemory->write(0x0703, 0x01);
+    simpleMobo->write(0x0703, 0x01);
 
     CLOCK(4);
     CHECK(testCPU._regA == 0xff);
@@ -958,7 +958,7 @@ TEST_CASE("and") {
 TEST_CASE("or") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::OR_A,
         Opcode::OR_B,
         Opcode::OR_C,
@@ -978,7 +978,7 @@ TEST_CASE("or") {
     testCPU._regE = 0x10;
     testCPU._regH = 0x08;
     testCPU._regL = 0x04;
-    simpleMemory->write(0x0804, 0x02);
+    simpleMobo->write(0x0804, 0x02);
 
     CLOCK(4);
     CHECK(testCPU._regA == 0x00);
@@ -1020,7 +1020,7 @@ TEST_CASE("or") {
 TEST_CASE("xor") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::XOR_A,
         Opcode::XOR_B,
         Opcode::XOR_C,
@@ -1040,7 +1040,7 @@ TEST_CASE("xor") {
     testCPU._regE = 0x10;
     testCPU._regH = 0x08;
     testCPU._regL = 0x04;
-    simpleMemory->write(0x0804, 0x02);
+    simpleMobo->write(0x0804, 0x02);
 
     CLOCK(4);
     CHECK(testCPU._regA == 0x00);
@@ -1082,7 +1082,7 @@ TEST_CASE("xor") {
 TEST_CASE("increment") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::INC_A,
         Opcode::INC_B,
         Opcode::INC_C,
@@ -1100,7 +1100,7 @@ TEST_CASE("increment") {
     testCPU._regE = 0x04;
     testCPU._regH = 0x05;
     testCPU._regL = 0x06;
-    simpleMemory->write(0x0607, 0x07);
+    simpleMobo->write(0x0607, 0x07);
 
     CLOCK(40);
 
@@ -1111,13 +1111,13 @@ TEST_CASE("increment") {
     CHECK(testCPU._regE == 0x05);
     CHECK(testCPU._regH == 0x06);
     CHECK(testCPU._regL == 0x07);
-    CHECK(simpleMemory->read(0x0607) == 0x08);
+    CHECK(simpleMobo->read(0x0607) == 0x08);
 }
 
 TEST_CASE("decrement") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::DEC_A,
         Opcode::DEC_B,
         Opcode::DEC_C,
@@ -1135,7 +1135,7 @@ TEST_CASE("decrement") {
     testCPU._regE = 0x05;
     testCPU._regH = 0x06;
     testCPU._regL = 0x07;
-    simpleMemory->write(0x0506, 0x08);
+    simpleMobo->write(0x0506, 0x08);
 
     CLOCK(40);
 
@@ -1146,13 +1146,13 @@ TEST_CASE("decrement") {
     CHECK(testCPU._regE == 0x04);
     CHECK(testCPU._regH == 0x05);
     CHECK(testCPU._regL == 0x06);
-    CHECK(simpleMemory->read(0x0506) == 0x07);
+    CHECK(simpleMobo->read(0x0506) == 0x07);
 }
 
 TEST_CASE("16-bit add") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::ADD_HL_BC,
         Opcode::ADD_HL_DE,
         Opcode::ADD_HL_HL,
@@ -1201,7 +1201,7 @@ TEST_CASE("add to SP") {
     int8_t rawNeg2 = -2;
     auto neg2 = *reinterpret_cast<uint8_t*>(&rawNeg2);
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::ADD_SP_N,
         (int8_t)1,
         Opcode::ADD_SP_N,
@@ -1220,7 +1220,7 @@ TEST_CASE("add to SP") {
 TEST_CASE("16-bit increment") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::INC_BC,
         Opcode::INC_DE,
         Opcode::INC_HL,
@@ -1243,7 +1243,7 @@ TEST_CASE("16-bit increment") {
 TEST_CASE("16-bit decrement") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::DEC_BC,
         Opcode::DEC_DE,
         Opcode::DEC_HL,
@@ -1266,7 +1266,7 @@ TEST_CASE("16-bit decrement") {
 TEST_CASE("DAA") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LD_A_n,
         0x05, // 5 is the same in BCD and hex
         Opcode::ADD_A_A,
@@ -1291,7 +1291,7 @@ TEST_CASE("DAA") {
 TEST_CASE("complement A") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::LD_A_n,
         0xf0,
         Opcode::CPL,
@@ -1307,7 +1307,7 @@ TEST_CASE("complement A") {
 TEST_CASE("complement carry") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::CCF,
         Opcode::CCF,
     });
@@ -1324,7 +1324,7 @@ TEST_CASE("complement carry") {
 TEST_CASE("set carry") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::SCF,
     });
 
@@ -1337,7 +1337,7 @@ TEST_CASE("set carry") {
 TEST_CASE("unconditional jump") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::JP_NN,
         0x02,
         0x01,
@@ -1351,7 +1351,7 @@ TEST_CASE("unconditional jump") {
 TEST_CASE("conditional jump") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::JP_NZ_NN, 0x02, 0x01,
         Opcode::JP_NZ_NN, 0x04, 0x03,
         Opcode::JP_Z_NN,  0x06, 0x05,
@@ -1402,7 +1402,7 @@ TEST_CASE("conditional jump") {
 TEST_CASE("jump to HL") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::JP_HL,
     });
 
@@ -1417,7 +1417,7 @@ TEST_CASE("unconditional relative jump") {
     int8_t rawNeg3 = -3;
     auto neg3 = *reinterpret_cast<uint8_t*>(&rawNeg3);
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::JR_N,
         0x01,
         Opcode::JR_N,
@@ -1436,7 +1436,7 @@ TEST_CASE("unconditional relative jump") {
 TEST_CASE("conditional relative jump") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::JR_NZ_N, 0x01,
         Opcode::JR_NZ_N, 0x02,
         Opcode::JR_Z_N,  0x03,
@@ -1487,7 +1487,7 @@ TEST_CASE("conditional relative jump") {
 TEST_CASE("call") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::CALL_NN,
         0x02,
         0x01,
@@ -1497,13 +1497,13 @@ TEST_CASE("call") {
 
     CHECK(testCPU._programCounter == 0x0102);
     CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 2);
-    CHECK(simpleMemory->readLI(INIT_STACK_POINTER - 2) == INIT_VECTOR + 3);
+    CHECK(simpleMobo->readLI(INIT_STACK_POINTER - 2) == INIT_VECTOR + 3);
 }
 
 TEST_CASE("conditional call") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::CALL_NZ_NN, 0x02, 0x01,
         Opcode::CALL_NZ_NN, 0x04, 0x03,
         Opcode::CALL_Z_NN,  0x06, 0x05,
@@ -1518,7 +1518,7 @@ TEST_CASE("conditional call") {
     CLOCK(12);
     CHECK(testCPU._programCounter == 0x0102);
     CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 2);
-    CHECK(simpleMemory->readLI(testCPU._stackPointer) == INIT_VECTOR + 3);
+    CHECK(simpleMobo->readLI(testCPU._stackPointer) == INIT_VECTOR + 3);
 
     testCPU._programCounter = INIT_VECTOR + 3;
     testCPU.zFlag(true);
@@ -1530,7 +1530,7 @@ TEST_CASE("conditional call") {
     CLOCK(12);
     CHECK(testCPU._programCounter == 0x0506);
     CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 4);
-    CHECK(simpleMemory->readLI(testCPU._stackPointer) == INIT_VECTOR + 9);
+    CHECK(simpleMobo->readLI(testCPU._stackPointer) == INIT_VECTOR + 9);
 
     testCPU._programCounter = INIT_VECTOR + 9;
     testCPU.zFlag(false);
@@ -1542,7 +1542,7 @@ TEST_CASE("conditional call") {
     CLOCK(12);
     CHECK(testCPU._programCounter == 0x090A);
     CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 6);
-    CHECK(simpleMemory->readLI(testCPU._stackPointer) == INIT_VECTOR + 15);
+    CHECK(simpleMobo->readLI(testCPU._stackPointer) == INIT_VECTOR + 15);
 
     testCPU._programCounter = INIT_VECTOR + 15;
     testCPU.cFlag(true);
@@ -1554,7 +1554,7 @@ TEST_CASE("conditional call") {
     CLOCK(12);
     CHECK(testCPU._programCounter == 0x0D0E);
     CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 8);
-    CHECK(simpleMemory->readLI(testCPU._stackPointer) == INIT_VECTOR + 21);
+    CHECK(simpleMobo->readLI(testCPU._stackPointer) == INIT_VECTOR + 21);
 
     testCPU._programCounter = INIT_VECTOR + 21;
     testCPU.cFlag(false);
@@ -1566,7 +1566,7 @@ TEST_CASE("conditional call") {
 TEST_CASE("RST") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::RST_08,
     });
 
@@ -1574,13 +1574,13 @@ TEST_CASE("RST") {
 
     CHECK(testCPU._programCounter == 0x0008);
     CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 2);
-    CHECK(simpleMemory->readLI(testCPU._stackPointer) == INIT_VECTOR + 1);
+    CHECK(simpleMobo->readLI(testCPU._stackPointer) == INIT_VECTOR + 1);
 }
 
 TEST_CASE("return") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::CALL_NN,
         0x04,
         0x01,
@@ -1595,7 +1595,7 @@ TEST_CASE("return") {
 TEST_CASE("conditional return") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::CALL_NN,
         0x04,
         0x01,
@@ -1615,7 +1615,7 @@ TEST_CASE("conditional return") {
 TEST_CASE("return and enable interrupts") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::CALL_NN,
         0x04,
         0x01,
@@ -1633,7 +1633,7 @@ TEST_CASE("return and enable interrupts") {
 TEST_CASE("halt") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::HALT,
     });
 
@@ -1646,7 +1646,7 @@ TEST_CASE("halt") {
 TEST_CASE("stop") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::STOP,
     });
 
@@ -1659,7 +1659,7 @@ TEST_CASE("stop") {
 TEST_CASE("interrupt enable/disable") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::DI,
         Opcode::EI,
     });
@@ -1676,7 +1676,7 @@ TEST_CASE("interrupt enable/disable") {
 TEST_CASE("rlc") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::PREFIX_CB,
         0x00,
         Opcode::PREFIX_CB,
@@ -1685,7 +1685,7 @@ TEST_CASE("rlc") {
         0x06,
     });
 
-    simpleMemory->write(0x0000, 0x0f);
+    simpleMobo->write(0x0000, 0x0f);
 
     testCPU._regB = 0xaa;
     testCPU.cFlag(true);
@@ -1705,14 +1705,14 @@ TEST_CASE("rlc") {
 
     CLOCK(16);
 
-    CHECK(simpleMemory->read(0x0000) == 0x1e);
+    CHECK(simpleMobo->read(0x0000) == 0x1e);
     CHECK(testCPU.cFlag() == false);
 }
 
 TEST_CASE("rl") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::PREFIX_CB,
         0x10,
         Opcode::PREFIX_CB,
@@ -1721,7 +1721,7 @@ TEST_CASE("rl") {
         0x16,
     });
 
-    simpleMemory->write(0x0000, 0x0f);
+    simpleMobo->write(0x0000, 0x0f);
 
     testCPU._regB = 0xaa;
     testCPU.cFlag(false);
@@ -1741,14 +1741,14 @@ TEST_CASE("rl") {
 
     CLOCK(16);
 
-    CHECK(simpleMemory->read(0x0000) == 0x1f);
+    CHECK(simpleMobo->read(0x0000) == 0x1f);
     CHECK(testCPU.cFlag() == false);
 }
 
 TEST_CASE("rrc") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::PREFIX_CB,
         0x09,
         Opcode::PREFIX_CB,
@@ -1757,7 +1757,7 @@ TEST_CASE("rrc") {
         0x0e,
     });
 
-    simpleMemory->write(0x0000, 0x0f);
+    simpleMobo->write(0x0000, 0x0f);
 
     testCPU._regC = 0x55;
     testCPU.cFlag(false);
@@ -1777,14 +1777,14 @@ TEST_CASE("rrc") {
 
     CLOCK(16);
 
-    CHECK(simpleMemory->read(0x0000) == 0x87);
+    CHECK(simpleMobo->read(0x0000) == 0x87);
     CHECK(testCPU.cFlag() == true);
 }
 
 TEST_CASE("rr") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::PREFIX_CB,
         0x19,
         Opcode::PREFIX_CB,
@@ -1793,7 +1793,7 @@ TEST_CASE("rr") {
         0x1e,
     });
 
-    simpleMemory->write(0x0000, 0x0f);
+    simpleMobo->write(0x0000, 0x0f);
 
     testCPU._regC = 0xaa;
     testCPU.cFlag(true);
@@ -1813,14 +1813,14 @@ TEST_CASE("rr") {
 
     CLOCK(16);
 
-    CHECK(simpleMemory->read(0x0000) == 0x07);
+    CHECK(simpleMobo->read(0x0000) == 0x07);
     CHECK(testCPU.cFlag() == true);
 }
 
 TEST_CASE("sla") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::PREFIX_CB,
         0x22,
     });
@@ -1836,7 +1836,7 @@ TEST_CASE("sla") {
 TEST_CASE("srl") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::PREFIX_CB,
         0x3b,
     });
@@ -1852,7 +1852,7 @@ TEST_CASE("srl") {
 TEST_CASE("sra") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::PREFIX_CB,
         0x2b,
         Opcode::PREFIX_CB,
@@ -1877,7 +1877,7 @@ TEST_CASE("sra") {
 TEST_CASE("swap") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::PREFIX_CB,
         0x34,
         Opcode::PREFIX_CB,
@@ -1896,7 +1896,7 @@ TEST_CASE("swap") {
 TEST_CASE("bit") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::PREFIX_CB,
         0x40,
         Opcode::PREFIX_CB,
@@ -1921,7 +1921,7 @@ TEST_CASE("bit") {
 TEST_CASE("set") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::PREFIX_CB,
         0xc0,
         Opcode::PREFIX_CB,
@@ -1948,7 +1948,7 @@ TEST_CASE("set") {
 TEST_CASE("reset") {
     WITH_CPU_AND_SIMPLE_MEMORY();
 
-    simpleMemory->write(INIT_VECTOR, {
+    simpleMobo->write(INIT_VECTOR, {
         Opcode::PREFIX_CB,
         0x80,
         Opcode::PREFIX_CB,

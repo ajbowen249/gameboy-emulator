@@ -4,9 +4,9 @@
 #include <cstdint>
 #include <memory>
 
-class Memory {
+class Motherboard {
 public:
-    typedef std::shared_ptr<Memory> Ptr;
+    typedef std::shared_ptr<Motherboard> Ptr;
 
     virtual uint8_t read(uint16_t addr) = 0;
     virtual void write(uint16_t addr, uint8_t value) = 0;

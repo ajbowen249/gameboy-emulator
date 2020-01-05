@@ -6,7 +6,7 @@
 
 #include <sstream>
 
-CPU::CPU(Memory::Ptr memory) : _memory(memory) {
+CPU::CPU(Motherboard::Ptr mobo) : _mobo(mobo) {
     reset();
 }
 
@@ -45,7 +45,7 @@ void CPU::machineCycle() {
 }
 
 int8_t CPU::decodeAndExecute() {
-    uint8_t opcode = _memory->read(_programCounter++);
+    uint8_t opcode = _mobo->read(_programCounter++);
 
     switch(opcode) {
         case Opcode::LD_A_n:
@@ -339,7 +339,7 @@ int8_t CPU::decodeAndExecute() {
 }
 
 int8_t CPU::I_LoadImmediate(uint8_t opcode) {
-    uint8_t value = _memory->read(_programCounter++);
+    uint8_t value = _mobo->read(_programCounter++);
 
     switch(opcode) {
         case Opcode::LD_A_n: _regA = value; break;
@@ -382,29 +382,29 @@ int8_t CPU::I_TransferRegister(uint8_t opcode) {
 
 int8_t CPU::I_LoadAddressIntoRegister(uint8_t opcode) {
     if (opcode == Opcode::LD_A_afC) {
-        _regA = _memory->read(0xff00 + (uint16_t)_regC);
+        _regA = _mobo->read(0xff00 + (uint16_t)_regC);
         return 2;
     } else if (opcode == Opcode::LDH_A_afN) {
-        const auto indirectAddress = _memory->read(_programCounter++);
-        _regA = _memory->read(0xff00 + (uint16_t)indirectAddress);
+        const auto indirectAddress = _mobo->read(_programCounter++);
+        _regA = _mobo->read(0xff00 + (uint16_t)indirectAddress);
         return 3;
     }
 
     switch(opcode) {
         case Opcode::LD_A_aBC:
-            _regA = _memory->read(regBC());
+            _regA = _mobo->read(regBC());
             return 2;
         case Opcode::LD_A_aDE:
-            _regA = _memory->read(regDE());
+            _regA = _mobo->read(regDE());
             return 2;
         case Opcode::LD_A_aNN:
-            const auto addr = _memory->readLI(_programCounter);
+            const auto addr = _mobo->readLI(_programCounter);
             _programCounter += 2;
-            _regA = _memory->read(addr);
+            _regA = _mobo->read(addr);
             return 4;
     }
 
-    const auto value = _memory->read(regHL());
+    const auto value = _mobo->read(regHL());
 
     if (opcode == Opcode::LDD_A_aHL) {
         regHL(regHL() - 1);
@@ -429,25 +429,25 @@ int8_t CPU::I_LoadAddressIntoRegister(uint8_t opcode) {
 
 int8_t CPU::I_StoreToAddress(uint8_t opcode) {
     if (opcode == Opcode::LD_afC_A) {
-        _memory->write(0xff00 + (uint16_t)_regC, _regA);
+        _mobo->write(0xff00 + (uint16_t)_regC, _regA);
         return 2;
     } else if (opcode == Opcode::LDH_afN_A) {
-        const auto indirectAddress = _memory->read(_programCounter++);
-        _memory->write(0xff00 + (uint16_t)indirectAddress, _regA);
+        const auto indirectAddress = _mobo->read(_programCounter++);
+        _mobo->write(0xff00 + (uint16_t)indirectAddress, _regA);
         return 3;
     }
 
     switch(opcode) {
         case Opcode::LD_aBC_A:
-            _memory->write(regBC(), _regA);
+            _mobo->write(regBC(), _regA);
             return 2;
         case Opcode::LD_aDE_A:
-            _memory->write(regDE(), _regA);
+            _mobo->write(regDE(), _regA);
             return 2;
         case Opcode::LD_aNN_A:
-            const auto addr = _memory->readLI(_programCounter);
+            const auto addr = _mobo->readLI(_programCounter);
             _programCounter += 2;
-            _memory->write(addr, _regA);
+            _mobo->write(addr, _regA);
             return 4;
     }
 
@@ -463,11 +463,11 @@ int8_t CPU::I_StoreToAddress(uint8_t opcode) {
         case Opcode::LD_aHL_H: value = _regH; break;
         case Opcode::LD_aHL_L: value = _regL; break;
         case Opcode::LD_aHL_n:
-            value = _memory->read(_programCounter++);
+            value = _mobo->read(_programCounter++);
             break;
     }
 
-    _memory->write(regHL(), value);
+    _mobo->write(regHL(), value);
 
     if (opcode == Opcode::LDD_aHL_A) {
         regHL(regHL() - 1);
@@ -479,7 +479,7 @@ int8_t CPU::I_StoreToAddress(uint8_t opcode) {
 }
 
 int8_t CPU::I_LoadImmediate16(uint8_t opcode) {
-    const auto value = _memory->readLI(_programCounter);
+    const auto value = _mobo->readLI(_programCounter);
     _programCounter += 2;
 
     switch(opcode) {
@@ -493,12 +493,12 @@ int8_t CPU::I_LoadImmediate16(uint8_t opcode) {
 }
 
 int8_t CPU::I_LoadHLWithSPN() {
-    auto rawOffset = _memory->read(_programCounter++);
+    auto rawOffset = _mobo->read(_programCounter++);
     auto offset = *reinterpret_cast<int8_t*>(&rawOffset);
     const auto effectiveAddress = _stackPointer + (int16_t)offset;
     // Little-endian load
-    _regL = _memory->read(effectiveAddress);
-    _regH = _memory->read(effectiveAddress + 1);
+    _regL = _mobo->read(effectiveAddress);
+    _regH = _mobo->read(effectiveAddress + 1);
 
     zFlag(false);
     nFlag(false);
@@ -518,10 +518,10 @@ int8_t CPU::I_LoadHLWithSPN() {
 }
 
 int8_t CPU::I_StoreStackPointer() {
-    const auto address = _memory->readLI(_programCounter);
+    const auto address = _mobo->readLI(_programCounter);
     _programCounter += 2;
 
-    _memory->writeLI(address, _stackPointer);
+    _mobo->writeLI(address, _stackPointer);
 
     return 5;
 }
@@ -537,13 +537,13 @@ int8_t CPU::I_PushRegister(uint8_t opcode) {
 
     _stackPointer -= 2;
 
-    _memory->writeLI(_stackPointer, value);
+    _mobo->writeLI(_stackPointer, value);
 
     return 4;
 }
 
 int8_t CPU::I_PopRegister(uint8_t opcode) {
-    uint16_t value = _memory->readLI(_stackPointer);
+    uint16_t value = _mobo->readLI(_stackPointer);
     _stackPointer += 2;
 
     switch (opcode) {
@@ -569,11 +569,11 @@ int8_t CPU::I_8BitAdd(uint8_t opcode) {
         case Opcode::ADD_A_H: case Opcode::ADC_A_H: operand = _regH; break;
         case Opcode::ADD_A_L: case Opcode::ADC_A_L: operand = _regL; break;
         case Opcode::ADD_A_aHL: case Opcode::ADC_A_aHL:
-            operand = _memory->read(regHL());
+            operand = _mobo->read(regHL());
             cycles = 2;
             break;
         case Opcode::ADD_A_N: case Opcode::ADC_A_N:
-            operand = _memory->read(_programCounter++);
+            operand = _mobo->read(_programCounter++);
             cycles = 2;
             break;
     }
@@ -608,11 +608,11 @@ int8_t CPU::I_8BitSubtract(uint8_t opcode) {
         case Opcode::SUB_H: case Opcode::SBC_A_H: operand = _regH; break;
         case Opcode::SUB_L: case Opcode::SBC_A_L: operand = _regL; break;
         case Opcode::SUB_aHL: case Opcode::SBC_A_aHL:
-            operand = _memory->read(regHL());
+            operand = _mobo->read(regHL());
             cycles = 2;
             break;
         case Opcode::SUB_N: case Opcode::SBC_A_N:
-            operand = _memory->read(_programCounter++);
+            operand = _mobo->read(_programCounter++);
             cycles = 2;
             break;
     }
@@ -649,11 +649,11 @@ int8_t CPU::I_8BitSubtract(uint8_t opcode) {
         case Opcode::operation##_H: operand = _regH; break; \
         case Opcode::operation##_L: operand = _regL; break; \
         case Opcode::operation##_aHL: \
-            operand = _memory->read(regHL()); \
+            operand = _mobo->read(regHL()); \
             cycles = 2; \
             break; \
         case Opcode::operation##_N: \
-            operand = _memory->read(_programCounter++); \
+            operand = _mobo->read(_programCounter++); \
             cycles = 2; \
             break; \
     } \
@@ -716,8 +716,8 @@ int8_t CPU::I_Compare(uint8_t opcode) {
 int8_t CPU::I_Increment(uint8_t opcode) {
     uint8_t original = 0;
     if (opcode == Opcode::INC_aHL) {
-        original = _memory->read(regHL());
-        _memory->write(regHL(), original + 1);
+        original = _mobo->read(regHL());
+        _mobo->write(regHL(), original + 1);
     }
 
     switch(opcode) {
@@ -744,8 +744,8 @@ int8_t CPU::I_Increment(uint8_t opcode) {
 int8_t CPU::I_Decrement(uint8_t opcode) {
     uint8_t original = 0;
     if (opcode == Opcode::DEC_aHL) {
-        original = _memory->read(regHL());
-        _memory->write(regHL(), original - 1);
+        original = _mobo->read(regHL());
+        _mobo->write(regHL(), original - 1);
     }
 
     switch(opcode) {
@@ -788,7 +788,7 @@ int8_t CPU::I_16BitAdd(uint8_t opcode) {
 }
 
 int8_t CPU::I_AddToSP() {
-    auto rawOperand = _memory->read(_programCounter++);
+    auto rawOperand = _mobo->read(_programCounter++);
     auto operand = *reinterpret_cast<int8_t*>(&rawOperand);
 
     uint16_t result = _stackPointer + operand;
@@ -883,7 +883,7 @@ int8_t CPU::I_SetCarry() {
 }
 
 int8_t CPU::I_UnconditionalJump() {
-    _programCounter = _memory->readLI(_programCounter);
+    _programCounter = _mobo->readLI(_programCounter);
     return 3;
 }
 
@@ -897,7 +897,7 @@ int8_t CPU::I_UnconditionalJump() {
     } \
 
 int8_t CPU::I_ConditionalJump(uint8_t opcode) {
-    uint16_t newAddress = _memory->readLI(_programCounter);
+    uint16_t newAddress = _mobo->readLI(_programCounter);
     _programCounter += 2;
 
     BRANCH_CONDITION(JP, _NN);
@@ -915,7 +915,7 @@ int8_t CPU::I_JumpToHL() {
 }
 
 int8_t CPU::I_UnconditionalRelativeJump() {
-    auto rawOffset = _memory->read(_programCounter++);
+    auto rawOffset = _mobo->read(_programCounter++);
     auto offset = *reinterpret_cast<int8_t*>(&rawOffset);
 
     _programCounter += offset;
@@ -924,7 +924,7 @@ int8_t CPU::I_UnconditionalRelativeJump() {
 }
 
 int8_t CPU::I_ConditionalRelativeJump(uint8_t opcode) {
-    auto rawOffset = _memory->read(_programCounter++);
+    auto rawOffset = _mobo->read(_programCounter++);
     auto offset = *reinterpret_cast<int8_t*>(&rawOffset);
 
     BRANCH_CONDITION(JR, _N);
@@ -937,11 +937,11 @@ int8_t CPU::I_ConditionalRelativeJump(uint8_t opcode) {
 }
 
 int8_t CPU::I_Call() {
-    auto address = _memory->readLI(_programCounter);
+    auto address = _mobo->readLI(_programCounter);
     _programCounter += 2;
 
     _stackPointer -= 2;
-    _memory->writeLI(_stackPointer, _programCounter);
+    _mobo->writeLI(_stackPointer, _programCounter);
 
     _programCounter = address;
 
@@ -949,14 +949,14 @@ int8_t CPU::I_Call() {
 }
 
 int8_t CPU::I_ConditionalCall(uint8_t opcode) {
-    auto address = _memory->readLI(_programCounter);
+    auto address = _mobo->readLI(_programCounter);
     _programCounter += 2;
 
     BRANCH_CONDITION(CALL, _NN);
 
     if (condition) {
         _stackPointer -= 2;
-        _memory->writeLI(_stackPointer, _programCounter);
+        _mobo->writeLI(_stackPointer, _programCounter);
 
         _programCounter = address;
     }
@@ -978,7 +978,7 @@ int8_t CPU::I_RST(uint8_t opcode) {
     }
 
     _stackPointer -= 2;
-    _memory->writeLI(_stackPointer, _programCounter);
+    _mobo->writeLI(_stackPointer, _programCounter);
 
     _programCounter = address;
 
@@ -986,7 +986,7 @@ int8_t CPU::I_RST(uint8_t opcode) {
 }
 
 int8_t CPU::I_Return(uint8_t opcode) {
-    uint16_t address = _memory->readLI(_stackPointer);
+    uint16_t address = _mobo->readLI(_stackPointer);
     _stackPointer += 2;
 
     _programCounter = address;
@@ -1002,7 +1002,7 @@ int8_t CPU::I_ConditionalReturn(uint8_t opcode) {
     BRANCH_CONDITION(RET,);
 
     if (condition) {
-        uint16_t address = _memory->readLI(_stackPointer);
+        uint16_t address = _mobo->readLI(_stackPointer);
         _stackPointer += 2;
 
         _programCounter = address;
@@ -1031,7 +1031,7 @@ int8_t CPU::I_SetInterruptEnable(uint8_t opcode) {
 }
 
 int8_t CPU::I_ExecCBGroup() {
-    const auto opcode = _memory->read(_programCounter++);
+    const auto opcode = _mobo->read(_programCounter++);
     const uint8_t highNibble = opcode & 0xf0;
     const uint8_t lowNibble = opcode & 0x0f;
     const bool dataIsInRegister = lowNibble != 0x06 && lowNibble != 0x0e;
@@ -1050,7 +1050,7 @@ int8_t CPU::I_ExecCBGroup() {
             case 0x07: case 0x0f: dataPtr = &_regA; break;
         }
     } else {
-        tempReadData = _memory->read(regHL());
+        tempReadData = _mobo->read(regHL());
         dataPtr = &tempReadData;
     }
 
@@ -1093,7 +1093,7 @@ int8_t CPU::I_ExecCBGroup() {
     }
 
     if (!dataIsInRegister) {
-        _memory->write(regHL(), tempReadData);
+        _mobo->write(regHL(), tempReadData);
     }
 
     return dataIsInRegister ? 2 : 4;

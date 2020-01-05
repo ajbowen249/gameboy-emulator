@@ -3,7 +3,7 @@
 
 #include <cstdint>
 
-#include "Memory.h"
+#include "Motherboard.h"
 
 #define INIT_VECTOR 0x0100
 #define INIT_STACK_POINTER 0xfffe
@@ -23,7 +23,7 @@
 
 class CPU {
 public:
-    CPU(Memory::Ptr memory);
+    CPU(Motherboard::Ptr mobo);
 
     /** Zero out flags, reset the PC and SP.
      */
@@ -77,7 +77,7 @@ public:
     inline void cFlag(bool value) { SET_FLAG(value, 0x10); }
 
 private:
-    Memory::Ptr _memory;
+    Motherboard::Ptr _mobo;
     int8_t _awaitingClockCycles;
     int8_t _awaitingMachineCycles;
 

@@ -4,13 +4,13 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 
 #include "CPU.h"
-#include "SimpleMemory.h"
+#include "SimpleMotherboard.h"
 
 #include "doctest.h"
 
 #define WITH_CPU_AND_SIMPLE_MEMORY() \
-    auto simpleMemory = std::make_shared<SimpleMemory>(); \
-    CPU testCPU(simpleMemory); \
+    auto simpleMobo = std::make_shared<SimpleMotherboard>(); \
+    CPU testCPU(simpleMobo); \
 
 #define CLOCK(cycles) \
     for (int clock_cycle_iter = 0; clock_cycle_iter < cycles; clock_cycle_iter++) { \

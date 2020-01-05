@@ -13,7 +13,7 @@ add_executable(
     src/CPU.cpp
     src/main.cpp
     src/Log.cpp
-    src/Memory.cpp
+    src/Motherboard.cpp
 )
 
 target_include_directories(
@@ -29,9 +29,9 @@ add_executable(
     tests
     src/CPU.cpp
     src/Log.cpp
-    src/Memory.cpp
+    src/Motherboard.cpp
     test/main.cpp
-    test/SimpleMemory.cpp
+    test/SimpleMotherboard.cpp
 )
 
 target_include_directories(

@@ -3,11 +3,11 @@
 
 #include <vector>
 
-#include "Memory.h"
+#include "Motherboard.h"
 
-class SimpleMemory : public Memory {
+class SimpleMotherboard : public Motherboard {
 public:
-    SimpleMemory();
+    SimpleMotherboard();
 
     uint8_t read(uint16_t addr) override;
     void write(uint16_t addr, uint8_t value) override;
