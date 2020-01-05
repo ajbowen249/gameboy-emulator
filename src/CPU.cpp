@@ -322,6 +322,9 @@ int8_t CPU::decodeAndExecute() {
             return I_Halt();
         case Opcode::STOP:
             return I_Stop();
+        case Opcode::DI:
+        case Opcode::EI:
+            return I_SetInterruptEnable(opcode);
         case NOP:
         default:
             return 1;
@@ -1012,5 +1015,10 @@ int8_t CPU::I_Stop() {
     // For some reason, this takes an extra byte.
     _programCounter++;
 
+    return 1;
+}
+
+int8_t CPU::I_SetInterruptEnable(uint8_t opcode) {
+    _interruptsEnabled = opcode == Opcode::EI;
     return 1;
 }

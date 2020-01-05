@@ -332,6 +332,10 @@ enum Opcode : uint8_t {
 
     // Stop
     STOP = 0x10,
+
+    // Interrupt Enable/Disable
+    DI = 0xf3,
+    EI = 0xfb,
 };
 
 #endif // __Opcodes_h__

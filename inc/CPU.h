@@ -124,6 +124,7 @@ private:
     int8_t I_ConditionalReturn(uint8_t opcode);
     int8_t I_Halt();
     int8_t I_Stop();
+    int8_t I_SetInterruptEnable(uint8_t opcode);
 };
 
 #endif // __CPU_h_

@@ -1655,3 +1655,20 @@ TEST_CASE("stop") {
     CHECK(testCPU._isStopped == true);
     CHECK(testCPU._programCounter == INIT_VECTOR + 2);
 }
+
+TEST_CASE("interrupt enable/disable") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::DI,
+        Opcode::EI,
+    });
+
+    testCPU._interruptsEnabled = true;
+
+    CLOCK(4);
+    CHECK(testCPU._interruptsEnabled == false);
+
+    CLOCK(4);
+    CHECK(testCPU._interruptsEnabled == true);
+}
