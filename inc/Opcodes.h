@@ -304,6 +304,16 @@ enum Opcode : uint8_t {
     CALL_Z_NN  = 0xcc,
     CALL_NC_NN = 0xd4,
     CALL_C_NN  = 0xdc,
+
+    // Restarts
+    RST_00 = 0xc7,
+    RST_08 = 0xcf,
+    RST_10 = 0xd7,
+    RST_18 = 0xdf,
+    RST_20 = 0xe7,
+    RST_28 = 0xef,
+    RST_30 = 0xf7,
+    RST_38 = 0xff,
 };
 
 #endif // __Opcodes_h__

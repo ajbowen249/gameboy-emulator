@@ -1562,3 +1562,17 @@ TEST_CASE("conditional call") {
     CHECK(testCPU._programCounter == INIT_VECTOR + 24);
     CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 8);
 }
+
+TEST_CASE("RST") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::RST_08,
+    });
+
+    CLOCK(16);
+
+    CHECK(testCPU._programCounter == 0x0008);
+    CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 2);
+    CHECK(simpleMemory->readLI(testCPU._stackPointer) == INIT_VECTOR + 1);
+}

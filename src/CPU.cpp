@@ -298,6 +298,15 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::CALL_NC_NN:
         case Opcode::CALL_C_NN:
             return I_ConditionalCall(opcode);
+        case Opcode::RST_00:
+        case Opcode::RST_08:
+        case Opcode::RST_10:
+        case Opcode::RST_18:
+        case Opcode::RST_20:
+        case Opcode::RST_28:
+        case Opcode::RST_30:
+        case Opcode::RST_38:
+            return I_RST(opcode);
         case NOP:
         default:
             return 1;
@@ -928,4 +937,25 @@ int8_t CPU::I_ConditionalCall(uint8_t opcode) {
     }
 
     return 3;
+}
+
+int8_t CPU::I_RST(uint8_t opcode) {
+    uint16_t address = 0x0000;
+
+    switch(opcode) {
+        case Opcode::RST_08: address = 0x0008; break;
+        case Opcode::RST_10: address = 0x0010; break;
+        case Opcode::RST_18: address = 0x0018; break;
+        case Opcode::RST_20: address = 0x0020; break;
+        case Opcode::RST_28: address = 0x0028; break;
+        case Opcode::RST_30: address = 0x0030; break;
+        case Opcode::RST_38: address = 0x0038; break;
+    }
+
+    _stackPointer -= 2;
+    _memory->writeLI(_stackPointer, _programCounter);
+
+    _programCounter = address;
+
+    return 4;
 }
