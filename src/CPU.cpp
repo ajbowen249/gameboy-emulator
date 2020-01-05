@@ -325,6 +325,13 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::DI:
         case Opcode::EI:
             return I_SetInterruptEnable(opcode);
+        case Opcode::PREFIX_CB:
+            return I_ExecCBGroup();
+        case Opcode::RLCA:
+        case Opcode::RLA:
+        case Opcode::RRCA:
+        case Opcode::RRA:
+            return I_RotateA(opcode);
         case NOP:
         default:
             return 1;
@@ -1021,4 +1028,168 @@ int8_t CPU::I_Stop() {
 int8_t CPU::I_SetInterruptEnable(uint8_t opcode) {
     _interruptsEnabled = opcode == Opcode::EI;
     return 1;
+}
+
+int8_t CPU::I_ExecCBGroup() {
+    const auto opcode = _memory->read(_programCounter++);
+    const uint8_t highNibble = opcode & 0xf0;
+    const uint8_t lowNibble = opcode & 0x0f;
+    const bool dataIsInRegister = lowNibble != 0x06 && lowNibble != 0x0e;
+
+    uint8_t* dataPtr; // Pointer to byte we're working with
+    uint8_t tempReadData = 0x00; // Only used if reading/writing to memory
+
+    if (dataIsInRegister) {
+        switch(lowNibble) {
+            case 0x00: case 0x08: dataPtr = &_regB; break;
+            case 0x01: case 0x09: dataPtr = &_regC; break;
+            case 0x02: case 0x0a: dataPtr = &_regD; break;
+            case 0x03: case 0x0b: dataPtr = &_regE; break;
+            case 0x04: case 0x0c: dataPtr = &_regH; break;
+            case 0x05: case 0x0d: dataPtr = &_regL; break;
+            case 0x07: case 0x0f: dataPtr = &_regA; break;
+        }
+    } else {
+        tempReadData = _memory->read(regHL());
+        dataPtr = &tempReadData;
+    }
+
+    if (highNibble == 0x00) {
+        if (lowNibble <= 0x07) {
+            RotateLeft(dataPtr, true);
+        } else {
+            RotateRight(dataPtr, true);
+        }
+    } else if (highNibble == 0x10) {
+        if (lowNibble <= 0x07) {
+            RotateLeft(dataPtr, false);
+        } else {
+            RotateRight(dataPtr, false);
+        }
+    } else if (highNibble == 0x20) {
+        if (lowNibble <= 0x07) {
+            ShiftLeft(dataPtr);
+        } else {
+            ShiftRight(dataPtr, true);
+        }
+    } else if (highNibble == 0x30) {
+        if (lowNibble <= 0x07) {
+            Swap(dataPtr);
+        } else {
+            ShiftRight(dataPtr, false);
+        }
+    } else {
+        // Bitwise instructions start at 0x40. They increment bit index every 8
+        // values. They run from positions 0-7.
+        uint8_t bitIndex = ((opcode - 0x40) / 8) % 8;
+
+         if (highNibble >= 0x40 && highNibble <= 0x70) {
+            TestBit(dataPtr, bitIndex);
+        } else if (highNibble >= 0x80 && highNibble <= 0xB0) {
+            ResetBit(dataPtr, bitIndex);
+        } else {
+            SetBit(dataPtr, bitIndex);
+        }
+    }
+
+    if (!dataIsInRegister) {
+        _memory->write(regHL(), tempReadData);
+    }
+
+    return dataIsInRegister ? 2 : 4;
+}
+
+int8_t CPU::I_RotateA(uint8_t opcode) {
+    switch (opcode) {
+        case Opcode::RLCA: RotateLeft(&_regA, true); break;
+        case Opcode::RLA: RotateLeft(&_regA, false); break;
+        case Opcode::RRCA: RotateRight(&_regA, true); break;
+        case Opcode::RRA: RotateRight(&_regA, false); break;
+    }
+
+    return 1;
+}
+
+void CPU::RotateLeft(uint8_t* value, bool withCarry) {
+    const bool b7Set = (*value & 0x80) != 0;
+
+    (*value) <<= 1;
+    if ((!withCarry && cFlag()) || (withCarry && b7Set)) {
+        (*value) |= 0x01;
+    }
+
+    cFlag(b7Set);
+
+    zFlag(*value == 0);
+    nFlag(false);
+    hFlag(false);
+}
+
+void CPU::RotateRight(uint8_t* value, bool withCarry) {
+    const bool b0Set = (*value & 0x01) != 0;
+
+    (*value) >>= 1;
+    if ((!withCarry && cFlag()) || (withCarry && b0Set)) {
+        (*value) |= 0x80;
+    }
+
+    cFlag(b0Set);
+
+    zFlag(*value == 0);
+    nFlag(false);
+    hFlag(false);
+}
+
+void CPU::ShiftLeft(uint8_t* value) {
+    const bool b7Set = (*value & 0x80) != 0;
+
+    (*value) <<= 1;
+
+    zFlag((*value) == 0);
+    nFlag(false);
+    hFlag(false);
+    cFlag(b7Set);
+}
+
+void CPU::ShiftRight(uint8_t* value, bool preserveMSB) {
+    const bool b0Set = (*value & 0x01) != 0;
+    const bool b7Set = (*value & 0x80) != 0;
+
+    (*value) >>= 1;
+
+    if (preserveMSB && b7Set) {
+        (*value) |= 0x80;
+    }
+
+    zFlag((*value) == 0);
+    nFlag(false);
+    hFlag(false);
+    cFlag(b0Set);
+}
+
+void CPU::Swap(uint8_t* value) {
+    (*value) = ((*value) << 4) | ((*value) >> 4);
+
+    zFlag((*value) == 0);
+    nFlag(false);
+    hFlag(false);
+    cFlag(false);
+}
+
+void CPU::TestBit(uint8_t* value, uint8_t bitIndex) {
+    uint8_t mask = 0x01 << bitIndex;
+
+    zFlag(((*value) & mask) == 0);
+    nFlag(false);
+    hFlag(true);
+}
+
+void CPU::SetBit(uint8_t* value, uint8_t bitIndex) {
+    uint8_t mask = 0x01 << bitIndex;
+    (*value) |= mask;
+}
+
+void CPU::ResetBit(uint8_t* value, uint8_t bitIndex) {
+    uint8_t mask = ~(0x01 << bitIndex);
+    (*value) &= mask;
 }

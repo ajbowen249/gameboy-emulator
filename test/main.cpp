@@ -1672,3 +1672,302 @@ TEST_CASE("interrupt enable/disable") {
     CLOCK(4);
     CHECK(testCPU._interruptsEnabled == true);
 }
+
+TEST_CASE("rlc") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x00,
+        Opcode::PREFIX_CB,
+        0x00,
+        Opcode::PREFIX_CB,
+        0x06,
+    });
+
+    simpleMemory->write(0x0000, 0x0f);
+
+    testCPU._regB = 0xaa;
+    testCPU.cFlag(true);
+
+    CLOCK(8);
+
+    CHECK(testCPU._regB == 0x55);
+    CHECK(testCPU.cFlag() == true);
+
+    CLOCK(8);
+
+    CHECK(testCPU._regB == 0xaa);
+    CHECK(testCPU.cFlag() == false);
+
+    testCPU.regHL(0x0000);
+    testCPU.cFlag(true);
+
+    CLOCK(16);
+
+    CHECK(simpleMemory->read(0x0000) == 0x1e);
+    CHECK(testCPU.cFlag() == false);
+}
+
+TEST_CASE("rl") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x10,
+        Opcode::PREFIX_CB,
+        0x10,
+        Opcode::PREFIX_CB,
+        0x16,
+    });
+
+    simpleMemory->write(0x0000, 0x0f);
+
+    testCPU._regB = 0xaa;
+    testCPU.cFlag(false);
+
+    CLOCK(8);
+
+    CHECK(testCPU._regB == 0x54);
+    CHECK(testCPU.cFlag() == true);
+
+    CLOCK(8);
+
+    CHECK(testCPU._regB == 0xa9);
+    CHECK(testCPU.cFlag() == false);
+
+    testCPU.regHL(0x0000);
+    testCPU.cFlag(true);
+
+    CLOCK(16);
+
+    CHECK(simpleMemory->read(0x0000) == 0x1f);
+    CHECK(testCPU.cFlag() == false);
+}
+
+TEST_CASE("rrc") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x09,
+        Opcode::PREFIX_CB,
+        0x09,
+        Opcode::PREFIX_CB,
+        0x0e,
+    });
+
+    simpleMemory->write(0x0000, 0x0f);
+
+    testCPU._regC = 0x55;
+    testCPU.cFlag(false);
+
+    CLOCK(8);
+
+    CHECK(testCPU._regC == 0xaa);
+    CHECK(testCPU.cFlag() == true);
+
+    CLOCK(8);
+
+    CHECK(testCPU._regC == 0x55);
+    CHECK(testCPU.cFlag() == false);
+
+    testCPU.regHL(0x0000);
+    testCPU.cFlag(false);
+
+    CLOCK(16);
+
+    CHECK(simpleMemory->read(0x0000) == 0x87);
+    CHECK(testCPU.cFlag() == true);
+}
+
+TEST_CASE("rr") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x19,
+        Opcode::PREFIX_CB,
+        0x19,
+        Opcode::PREFIX_CB,
+        0x1e,
+    });
+
+    simpleMemory->write(0x0000, 0x0f);
+
+    testCPU._regC = 0xaa;
+    testCPU.cFlag(true);
+
+    CLOCK(8);
+
+    CHECK(testCPU._regC == 0xd5);
+    CHECK(testCPU.cFlag() == false);
+
+    CLOCK(8);
+
+    CHECK(testCPU._regC == 0x6a);
+    CHECK(testCPU.cFlag() == true);
+
+    testCPU.regHL(0x0000);
+    testCPU.cFlag(false);
+
+    CLOCK(16);
+
+    CHECK(simpleMemory->read(0x0000) == 0x07);
+    CHECK(testCPU.cFlag() == true);
+}
+
+TEST_CASE("sla") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x22,
+    });
+
+    testCPU._regD = 0xcd;
+    testCPU.cFlag(false);
+
+    CLOCK(8);
+    CHECK(testCPU._regD == 0x9a);
+    CHECK(testCPU.cFlag() == true);
+}
+
+TEST_CASE("srl") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x3b,
+    });
+
+    testCPU._regE = 0xff;
+    testCPU.cFlag(false);
+
+    CLOCK(8);
+    CHECK(testCPU._regE == 0x7f);
+    CHECK(testCPU.cFlag() == true);
+}
+
+TEST_CASE("sra") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x2b,
+        Opcode::PREFIX_CB,
+        0x2b,
+    });
+
+    testCPU._regE = 0xff;
+    testCPU.cFlag(false);
+
+    CLOCK(8);
+    CHECK(testCPU._regE == 0xff);
+    CHECK(testCPU.cFlag() == true);
+
+    testCPU._regE = 0x7f;
+    testCPU.cFlag(false);
+
+    CLOCK(8);
+    CHECK(testCPU._regE == 0x3f);
+    CHECK(testCPU.cFlag() == true);
+}
+
+TEST_CASE("swap") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x34,
+        Opcode::PREFIX_CB,
+        0x35,
+    });
+
+    testCPU._regH = 0x12;
+    testCPU._regL = 0xab;
+
+    CLOCK(16);
+
+    CHECK(testCPU._regH == 0x21);
+    CHECK(testCPU._regL == 0xba);
+}
+
+TEST_CASE("bit") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x40,
+        Opcode::PREFIX_CB,
+        0x7f,
+        Opcode::PREFIX_CB,
+        0x59,
+        Opcode::PREFIX_CB,
+        0x6a,
+    });
+
+    testCPU._regB = 0xfe;
+    testCPU._regA = 0x7f;
+    testCPU._regC = 0xf7;
+    testCPU._regD = 0x20;
+
+    for (int i = 0; i < 4; i++) {
+        CLOCK(8);
+        CHECK(testCPU.zFlag() == (i != 3));
+    }
+}
+
+TEST_CASE("set") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0xc0,
+        Opcode::PREFIX_CB,
+        0xff,
+        Opcode::PREFIX_CB,
+        0xda,
+        Opcode::PREFIX_CB,
+        0xeb,
+    });
+
+    testCPU._regB = 0x00;
+    testCPU._regA = 0x00;
+    testCPU._regD = 0x00;
+    testCPU._regE = 0x00;
+
+    CLOCK(32);
+
+    CHECK(testCPU._regB == 0x01);
+    CHECK(testCPU._regA == 0x80);
+    CHECK(testCPU._regD == 0x08);
+    CHECK(testCPU._regE == 0x20);
+}
+
+TEST_CASE("reset") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x80,
+        Opcode::PREFIX_CB,
+        0xbf,
+        Opcode::PREFIX_CB,
+        0x9a,
+        Opcode::PREFIX_CB,
+        0xab,
+    });
+
+    testCPU._regB = 0xff;
+    testCPU._regA = 0xff;
+    testCPU._regD = 0xff;
+    testCPU._regE = 0xff;
+
+    CLOCK(32);
+
+    CHECK(testCPU._regB == 0xfe);
+    CHECK(testCPU._regA == 0x7f);
+    CHECK(testCPU._regD == 0xf7);
+    CHECK(testCPU._regE == 0xdf);
+}
