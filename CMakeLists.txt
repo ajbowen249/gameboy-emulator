@@ -43,3 +43,7 @@ target_include_directories(
 target_link_libraries(
     tests
 )
+
+enable_testing()
+
+add_test(unit_tests tests)
