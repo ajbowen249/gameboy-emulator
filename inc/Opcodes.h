@@ -336,6 +336,9 @@ enum Opcode : uint8_t {
     // Interrupt Enable/Disable
     DI = 0xf3,
     EI = 0xfb,
+
+    // Prefix to most shift-and-rotate instructions
+    PREFIX_CB = 0xcb,
 };
 
 #endif // __Opcodes_h__

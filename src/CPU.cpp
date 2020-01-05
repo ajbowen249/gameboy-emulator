@@ -325,6 +325,8 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::DI:
         case Opcode::EI:
             return I_SetInterruptEnable(opcode);
+        case Opcode::PREFIX_CB:
+            return I_ExecCBGroup();
         case NOP:
         default:
             return 1;
@@ -1021,4 +1023,73 @@ int8_t CPU::I_Stop() {
 int8_t CPU::I_SetInterruptEnable(uint8_t opcode) {
     _interruptsEnabled = opcode == Opcode::EI;
     return 1;
+}
+
+int8_t CPU::I_ExecCBGroup() {
+    const auto opcode = _memory->read(_programCounter++);
+    const uint8_t highNibble = opcode & 0xf0;
+    const uint8_t lowNibble = opcode & 0x0f;
+    const bool dataIsInRegister = lowNibble != 0x06 && lowNibble != 0x0e;
+
+    uint8_t* dataPtr; // Pointer to byte we're working with
+    uint8_t tempReadData = 0x00; // Only used if reading/writing to memory
+
+    if (dataIsInRegister) {
+        switch(lowNibble) {
+            case 0x00: case 0x08: dataPtr = &_regB; break;
+            case 0x01: case 0x09: dataPtr = &_regC; break;
+            case 0x02: case 0x0a: dataPtr = &_regD; break;
+            case 0x03: case 0x0b: dataPtr = &_regE; break;
+            case 0x04: case 0x0c: dataPtr = &_regH; break;
+            case 0x05: case 0x0d: dataPtr = &_regL; break;
+            case 0x07: case 0x0f: dataPtr = &_regA; break;
+        }
+    } else {
+        tempReadData = _memory->read(regHL());
+        dataPtr = &tempReadData;
+    }
+
+    if (highNibble == 0x00) {
+        if (lowNibble <= 0x07) {
+            // TODO: RLC
+        } else {
+            // TODO: RRC
+        }
+    } else if (highNibble == 0x10) {
+        if (lowNibble <= 0x07) {
+            // TODO: RL
+        } else {
+            // TODO: RR
+        }
+    } else if (highNibble == 0x20) {
+        if (lowNibble <= 0x07) {
+            // TODO: SLA
+        } else {
+            // TODO: SRA
+        }
+    } else if (highNibble == 0x30) {
+        if (lowNibble <= 0x07) {
+            // TODO: SWAP
+        } else {
+            // TODO: SRL
+        }
+    } else {
+        // Bitwise instructions start at 0x40. They increment bit index every 8
+        // values. They run from positions 0-7.
+        uint8_t bitIndex = ((opcode - 0x40) / 8) % 8;
+
+         if (highNibble >= 0x40 && highNibble <= 0x70) {
+            // TODO: BIT
+        } else if (highNibble >= 0x80 && highNibble <= 0xB0) {
+            // TODO: RES
+        } else {
+            // TODO: SET
+        }
+    }
+
+    if (!dataIsInRegister) {
+        _memory->write(regHL(), tempReadData);
+    }
+
+    return dataIsInRegister ? 2 : 4;
 }
