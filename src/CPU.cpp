@@ -293,6 +293,11 @@ int8_t CPU::decodeAndExecute() {
             return I_ConditionalRelativeJump(opcode);
         case Opcode::CALL_NN:
             return I_Call();
+        case Opcode::CALL_NZ_NN:
+        case Opcode::CALL_Z_NN:
+        case Opcode::CALL_NC_NN:
+        case Opcode::CALL_C_NN:
+            return I_ConditionalCall(opcode);
         case NOP:
         default:
             return 1;
@@ -848,18 +853,20 @@ int8_t CPU::I_UnconditionalJump() {
     return 3;
 }
 
+#define BRANCH_CONDITION(mnemonic, addrlen) \
+    bool condition = false; \
+    switch(opcode) { \
+        case Opcode::mnemonic##_NZ##addrlen: condition = !zFlag(); break; \
+        case Opcode::mnemonic##_Z##addrlen: condition = zFlag(); break; \
+        case Opcode::mnemonic##_NC##addrlen: condition = !cFlag(); break; \
+        case Opcode::mnemonic##_C##addrlen: condition = cFlag(); break; \
+    } \
+
 int8_t CPU::I_ConditionalJump(uint8_t opcode) {
     uint16_t newAddress = _memory->readLI(_programCounter);
     _programCounter += 2;
 
-    bool condition = false;
-
-    switch(opcode) {
-        case Opcode::JP_NZ_NN: condition = !zFlag(); break;
-        case Opcode::JP_Z_NN: condition = zFlag(); break;
-        case Opcode::JP_NC_NN: condition = !cFlag(); break;
-        case Opcode::JP_C_NN: condition = cFlag(); break;
-    }
+    BRANCH_CONDITION(JP, _NN);
 
     if (condition) {
         _programCounter = newAddress;
@@ -886,14 +893,7 @@ int8_t CPU::I_ConditionalRelativeJump(uint8_t opcode) {
     auto rawOffset = _memory->read(_programCounter++);
     auto offset = *reinterpret_cast<int8_t*>(&rawOffset);
 
-    bool condition = false;
-
-    switch(opcode) {
-        case Opcode::JR_NZ_N: condition = !zFlag(); break;
-        case Opcode::JR_Z_N: condition = zFlag(); break;
-        case Opcode::JR_NC_N: condition = !cFlag(); break;
-        case Opcode::JR_C_N: condition = cFlag(); break;
-    }
+    BRANCH_CONDITION(JR, _N);
 
     if (condition) {
         _programCounter += offset;
@@ -910,6 +910,22 @@ int8_t CPU::I_Call() {
     _memory->writeLI(_stackPointer, _programCounter);
 
     _programCounter = address;
+
+    return 3;
+}
+
+int8_t CPU::I_ConditionalCall(uint8_t opcode) {
+    auto address = _memory->readLI(_programCounter);
+    _programCounter += 2;
+
+    BRANCH_CONDITION(CALL, _NN);
+
+    if (condition) {
+        _stackPointer -= 2;
+        _memory->writeLI(_stackPointer, _programCounter);
+
+        _programCounter = address;
+    }
 
     return 3;
 }

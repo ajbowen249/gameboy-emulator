@@ -1499,3 +1499,66 @@ TEST_CASE("call") {
     CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 2);
     CHECK(simpleMemory->readLI(INIT_STACK_POINTER - 2) == INIT_VECTOR + 3);
 }
+
+TEST_CASE("conditional call") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::CALL_NZ_NN, 0x02, 0x01,
+        Opcode::CALL_NZ_NN, 0x04, 0x03,
+        Opcode::CALL_Z_NN,  0x06, 0x05,
+        Opcode::CALL_Z_NN,  0x08, 0x07,
+        Opcode::CALL_NC_NN, 0x0A, 0x09,
+        Opcode::CALL_NC_NN, 0x0C, 0x0B,
+        Opcode::CALL_C_NN,  0x0E, 0x0D,
+        Opcode::CALL_C_NN,  0x10, 0x0F,
+    });
+
+    testCPU.zFlag(false);
+    CLOCK(12);
+    CHECK(testCPU._programCounter == 0x0102);
+    CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 2);
+    CHECK(simpleMemory->readLI(testCPU._stackPointer) == INIT_VECTOR + 3);
+
+    testCPU._programCounter = INIT_VECTOR + 3;
+    testCPU.zFlag(true);
+    CLOCK(12);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 6);
+    CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 2);
+
+    testCPU.zFlag(true);
+    CLOCK(12);
+    CHECK(testCPU._programCounter == 0x0506);
+    CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 4);
+    CHECK(simpleMemory->readLI(testCPU._stackPointer) == INIT_VECTOR + 9);
+
+    testCPU._programCounter = INIT_VECTOR + 9;
+    testCPU.zFlag(false);
+    CLOCK(12);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 12);
+    CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 4);
+
+    testCPU.cFlag(false);
+    CLOCK(12);
+    CHECK(testCPU._programCounter == 0x090A);
+    CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 6);
+    CHECK(simpleMemory->readLI(testCPU._stackPointer) == INIT_VECTOR + 15);
+
+    testCPU._programCounter = INIT_VECTOR + 15;
+    testCPU.cFlag(true);
+    CLOCK(12);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 18);
+    CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 6);
+
+    testCPU.cFlag(true);
+    CLOCK(12);
+    CHECK(testCPU._programCounter == 0x0D0E);
+    CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 8);
+    CHECK(simpleMemory->readLI(testCPU._stackPointer) == INIT_VECTOR + 21);
+
+    testCPU._programCounter = INIT_VECTOR + 21;
+    testCPU.cFlag(false);
+    CLOCK(12);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 24);
+    CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 8);
+}

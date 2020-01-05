@@ -298,6 +298,12 @@ enum Opcode : uint8_t {
 
     // Call
     CALL_NN = 0xcd,
+
+    // Conditional Calls
+    CALL_NZ_NN = 0xc4,
+    CALL_Z_NN  = 0xcc,
+    CALL_NC_NN = 0xd4,
+    CALL_C_NN  = 0xdc,
 };
 
 #endif // __Opcodes_h__
