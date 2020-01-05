@@ -323,6 +323,9 @@ enum Opcode : uint8_t {
     RET_Z  = 0xc8,
     RET_NC = 0xd0,
     RET_C  = 0xd8,
+
+    // Return and enable interrupts
+    RETI = 0xd9,
 };
 
 #endif // __Opcodes_h__

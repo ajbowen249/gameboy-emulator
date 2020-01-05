@@ -52,6 +52,8 @@ public:
 
     uint8_t _flags;
 
+    bool _interruptsEnabled;
+
     inline uint16_t regAF() const { RET_COMBO_REGISTER(_regA, _flags); }
     inline uint16_t regBC() const { RET_COMBO_REGISTER(_regB, _regC); }
     inline uint16_t regDE() const { RET_COMBO_REGISTER(_regD, _regE); }
@@ -116,7 +118,7 @@ private:
     int8_t I_Call();
     int8_t I_ConditionalCall(uint8_t opcode);
     int8_t I_RST(uint8_t opcode);
-    int8_t I_Return();
+    int8_t I_Return(uint8_t opcode);
     int8_t I_ConditionalReturn(uint8_t opcode);
 };
 

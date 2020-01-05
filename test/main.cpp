@@ -1611,3 +1611,21 @@ TEST_CASE("conditional return") {
     CLOCK(8); // Should not have tried to return as C is still true
     CHECK(testCPU._programCounter == INIT_VECTOR + 4);
 }
+
+TEST_CASE("return and enable interrupts") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::CALL_NN,
+        0x04,
+        0x01,
+        Opcode::NOP,
+        Opcode::RETI,
+    });
+
+    testCPU._interruptsEnabled = false;
+
+    CLOCK(20);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 3);
+    CHECK(testCPU._interruptsEnabled == true);
+}
