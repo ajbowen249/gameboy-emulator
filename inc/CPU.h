@@ -126,6 +126,7 @@ private:
     int8_t I_Stop();
     int8_t I_SetInterruptEnable(uint8_t opcode);
     int8_t I_ExecCBGroup();
+    int8_t I_RotateA(uint8_t opcode);
 
     void RotateLeft(uint8_t* value, bool withCarry);
     void RotateRight(uint8_t* value, bool withCarry);

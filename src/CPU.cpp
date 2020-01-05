@@ -327,6 +327,11 @@ int8_t CPU::decodeAndExecute() {
             return I_SetInterruptEnable(opcode);
         case Opcode::PREFIX_CB:
             return I_ExecCBGroup();
+        case Opcode::RLCA:
+        case Opcode::RLA:
+        case Opcode::RRCA:
+        case Opcode::RRA:
+            return I_RotateA(opcode);
         case NOP:
         default:
             return 1;
@@ -1092,6 +1097,17 @@ int8_t CPU::I_ExecCBGroup() {
     }
 
     return dataIsInRegister ? 2 : 4;
+}
+
+int8_t CPU::I_RotateA(uint8_t opcode) {
+    switch (opcode) {
+        case Opcode::RLCA: RotateLeft(&_regA, true); break;
+        case Opcode::RLA: RotateLeft(&_regA, false); break;
+        case Opcode::RRCA: RotateRight(&_regA, true); break;
+        case Opcode::RRA: RotateRight(&_regA, false); break;
+    }
+
+    return 1;
 }
 
 void CPU::RotateLeft(uint8_t* value, bool withCarry) {

@@ -339,6 +339,12 @@ enum Opcode : uint8_t {
 
     // Prefix to most shift-and-rotate instructions
     PREFIX_CB = 0xcb,
+
+    // Rotate A (truncated duplicate from CB)
+    RLCA = 0x07,
+    RLA  = 0x17,
+    RRCA = 0x0f,
+    RRA  = 0x1f,
 };
 
 #endif // __Opcodes_h__
