@@ -1069,7 +1069,7 @@ int8_t CPU::I_ExecCBGroup() {
         }
     } else if (highNibble == 0x30) {
         if (lowNibble <= 0x07) {
-            // TODO: SWAP
+            Swap(dataPtr);
         } else {
             ShiftRight(dataPtr, false);
         }
@@ -1149,4 +1149,13 @@ void CPU::ShiftRight(uint8_t* value, bool preserveMSB) {
     nFlag(false);
     hFlag(false);
     cFlag(b0Set);
+}
+
+void CPU::Swap(uint8_t* value) {
+    (*value) = ((*value) << 4) | ((*value) >> 4);
+
+    zFlag((*value) == 0);
+    nFlag(false);
+    hFlag(false);
+    cFlag(false);
 }

@@ -1873,3 +1873,22 @@ TEST_CASE("sra") {
     CHECK(testCPU._regE == 0x3f);
     CHECK(testCPU.cFlag() == true);
 }
+
+TEST_CASE("swap") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::PREFIX_CB,
+        0x34,
+        Opcode::PREFIX_CB,
+        0x35,
+    });
+
+    testCPU._regH = 0x12;
+    testCPU._regL = 0xab;
+
+    CLOCK(16);
+
+    CHECK(testCPU._regH == 0x21);
+    CHECK(testCPU._regL == 0xba);
+}
