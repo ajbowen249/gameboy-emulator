@@ -14,6 +14,7 @@ void CPU::reset() {
     _programCounter = INIT_VECTOR;
     _stackPointer = INIT_STACK_POINTER;
     _flags = 0;
+    _interruptsEnabled = true;
 
     _awaitingClockCycles = CLOCK_CYCLES_PER_MACHINE_CYCLE;
     _awaitingMachineCycles = 0;
@@ -307,6 +308,14 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::RST_30:
         case Opcode::RST_38:
             return I_RST(opcode);
+        case Opcode::RET:
+        case Opcode::RETI:
+            return I_Return(opcode);
+        case Opcode::RET_NZ:
+        case Opcode::RET_Z:
+        case Opcode::RET_NC:
+        case Opcode::RET_C:
+            return I_ConditionalReturn(opcode);
         case NOP:
         default:
             return 1;
@@ -958,4 +967,30 @@ int8_t CPU::I_RST(uint8_t opcode) {
     _programCounter = address;
 
     return 4;
+}
+
+int8_t CPU::I_Return(uint8_t opcode) {
+    uint16_t address = _memory->readLI(_stackPointer);
+    _stackPointer += 2;
+
+    _programCounter = address;
+
+    if (opcode == Opcode::RETI) {
+        _interruptsEnabled = true;
+    }
+
+    return 2;
+}
+
+int8_t CPU::I_ConditionalReturn(uint8_t opcode) {
+    BRANCH_CONDITION(RET,);
+
+    if (condition) {
+        uint16_t address = _memory->readLI(_stackPointer);
+        _stackPointer += 2;
+
+        _programCounter = address;
+    }
+
+    return 2;
 }

@@ -314,6 +314,18 @@ enum Opcode : uint8_t {
     RST_28 = 0xef,
     RST_30 = 0xf7,
     RST_38 = 0xff,
+
+    // Return
+    RET = 0xc9,
+
+    // Conditional Return
+    RET_NZ = 0xc0,
+    RET_Z  = 0xc8,
+    RET_NC = 0xd0,
+    RET_C  = 0xd8,
+
+    // Return and enable interrupts
+    RETI = 0xd9,
 };
 
 #endif // __Opcodes_h__
