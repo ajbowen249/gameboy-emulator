@@ -291,6 +291,22 @@ int8_t CPU::decodeAndExecute() {
         case Opcode::JR_NC_N:
         case Opcode::JR_C_N:
             return I_ConditionalRelativeJump(opcode);
+        case Opcode::CALL_NN:
+            return I_Call();
+        case Opcode::CALL_NZ_NN:
+        case Opcode::CALL_Z_NN:
+        case Opcode::CALL_NC_NN:
+        case Opcode::CALL_C_NN:
+            return I_ConditionalCall(opcode);
+        case Opcode::RST_00:
+        case Opcode::RST_08:
+        case Opcode::RST_10:
+        case Opcode::RST_18:
+        case Opcode::RST_20:
+        case Opcode::RST_28:
+        case Opcode::RST_30:
+        case Opcode::RST_38:
+            return I_RST(opcode);
         case NOP:
         default:
             return 1;
@@ -846,18 +862,20 @@ int8_t CPU::I_UnconditionalJump() {
     return 3;
 }
 
+#define BRANCH_CONDITION(mnemonic, addrlen) \
+    bool condition = false; \
+    switch(opcode) { \
+        case Opcode::mnemonic##_NZ##addrlen: condition = !zFlag(); break; \
+        case Opcode::mnemonic##_Z##addrlen: condition = zFlag(); break; \
+        case Opcode::mnemonic##_NC##addrlen: condition = !cFlag(); break; \
+        case Opcode::mnemonic##_C##addrlen: condition = cFlag(); break; \
+    } \
+
 int8_t CPU::I_ConditionalJump(uint8_t opcode) {
     uint16_t newAddress = _memory->readLI(_programCounter);
     _programCounter += 2;
 
-    bool condition = false;
-
-    switch(opcode) {
-        case Opcode::JP_NZ_NN: condition = !zFlag(); break;
-        case Opcode::JP_Z_NN: condition = zFlag(); break;
-        case Opcode::JP_NC_NN: condition = !cFlag(); break;
-        case Opcode::JP_C_NN: condition = cFlag(); break;
-    }
+    BRANCH_CONDITION(JP, _NN);
 
     if (condition) {
         _programCounter = newAddress;
@@ -884,18 +902,60 @@ int8_t CPU::I_ConditionalRelativeJump(uint8_t opcode) {
     auto rawOffset = _memory->read(_programCounter++);
     auto offset = *reinterpret_cast<int8_t*>(&rawOffset);
 
-    bool condition = false;
-
-    switch(opcode) {
-        case Opcode::JR_NZ_N: condition = !zFlag(); break;
-        case Opcode::JR_Z_N: condition = zFlag(); break;
-        case Opcode::JR_NC_N: condition = !cFlag(); break;
-        case Opcode::JR_C_N: condition = cFlag(); break;
-    }
+    BRANCH_CONDITION(JR, _N);
 
     if (condition) {
         _programCounter += offset;
     }
 
     return 2;
+}
+
+int8_t CPU::I_Call() {
+    auto address = _memory->readLI(_programCounter);
+    _programCounter += 2;
+
+    _stackPointer -= 2;
+    _memory->writeLI(_stackPointer, _programCounter);
+
+    _programCounter = address;
+
+    return 3;
+}
+
+int8_t CPU::I_ConditionalCall(uint8_t opcode) {
+    auto address = _memory->readLI(_programCounter);
+    _programCounter += 2;
+
+    BRANCH_CONDITION(CALL, _NN);
+
+    if (condition) {
+        _stackPointer -= 2;
+        _memory->writeLI(_stackPointer, _programCounter);
+
+        _programCounter = address;
+    }
+
+    return 3;
+}
+
+int8_t CPU::I_RST(uint8_t opcode) {
+    uint16_t address = 0x0000;
+
+    switch(opcode) {
+        case Opcode::RST_08: address = 0x0008; break;
+        case Opcode::RST_10: address = 0x0010; break;
+        case Opcode::RST_18: address = 0x0018; break;
+        case Opcode::RST_20: address = 0x0020; break;
+        case Opcode::RST_28: address = 0x0028; break;
+        case Opcode::RST_30: address = 0x0030; break;
+        case Opcode::RST_38: address = 0x0038; break;
+    }
+
+    _stackPointer -= 2;
+    _memory->writeLI(_stackPointer, _programCounter);
+
+    _programCounter = address;
+
+    return 4;
 }

@@ -295,6 +295,25 @@ enum Opcode : uint8_t {
     JR_Z_N  = 0x28,
     JR_NC_N = 0x30,
     JR_C_N  = 0x38,
+
+    // Call
+    CALL_NN = 0xcd,
+
+    // Conditional Calls
+    CALL_NZ_NN = 0xc4,
+    CALL_Z_NN  = 0xcc,
+    CALL_NC_NN = 0xd4,
+    CALL_C_NN  = 0xdc,
+
+    // Restarts
+    RST_00 = 0xc7,
+    RST_08 = 0xcf,
+    RST_10 = 0xd7,
+    RST_18 = 0xdf,
+    RST_20 = 0xe7,
+    RST_28 = 0xef,
+    RST_30 = 0xf7,
+    RST_38 = 0xff,
 };
 
 #endif // __Opcodes_h__
