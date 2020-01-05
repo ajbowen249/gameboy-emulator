@@ -275,6 +275,22 @@ int8_t CPU::decodeAndExecute() {
             return I_ComplementCarry();
         case Opcode::SCF:
             return I_SetCarry();
+        case Opcode::JP_NN:
+            return I_UnconditionalJump();
+        case Opcode::JP_NZ_NN:
+        case Opcode::JP_Z_NN:
+        case Opcode::JP_NC_NN:
+        case Opcode::JP_C_NN:
+            return I_ConditionalJump(opcode);
+        case Opcode::JP_HL:
+            return I_JumpToHL();
+        case Opcode::JR_N:
+            return I_UnconditionalRelativeJump();
+        case Opcode::JR_NZ_N:
+        case Opcode::JR_Z_N:
+        case Opcode::JR_NC_N:
+        case Opcode::JR_C_N:
+            return I_ConditionalRelativeJump(opcode);
         case NOP:
         default:
             return 1;
@@ -823,4 +839,63 @@ int8_t CPU::I_SetCarry() {
     cFlag(true);
 
     return 1;
+}
+
+int8_t CPU::I_UnconditionalJump() {
+    _programCounter = _memory->readLI(_programCounter);
+    return 3;
+}
+
+int8_t CPU::I_ConditionalJump(uint8_t opcode) {
+    uint16_t newAddress = _memory->readLI(_programCounter);
+    _programCounter += 2;
+
+    bool condition = false;
+
+    switch(opcode) {
+        case Opcode::JP_NZ_NN: condition = !zFlag(); break;
+        case Opcode::JP_Z_NN: condition = zFlag(); break;
+        case Opcode::JP_NC_NN: condition = !cFlag(); break;
+        case Opcode::JP_C_NN: condition = cFlag(); break;
+    }
+
+    if (condition) {
+        _programCounter = newAddress;
+    }
+
+    return 3;
+}
+
+int8_t CPU::I_JumpToHL() {
+    _programCounter = regHL();
+    return 4;
+}
+
+int8_t CPU::I_UnconditionalRelativeJump() {
+    auto rawOffset = _memory->read(_programCounter++);
+    auto offset = *reinterpret_cast<int8_t*>(&rawOffset);
+
+    _programCounter += offset;
+
+    return 2;
+}
+
+int8_t CPU::I_ConditionalRelativeJump(uint8_t opcode) {
+    auto rawOffset = _memory->read(_programCounter++);
+    auto offset = *reinterpret_cast<int8_t*>(&rawOffset);
+
+    bool condition = false;
+
+    switch(opcode) {
+        case Opcode::JR_NZ_N: condition = !zFlag(); break;
+        case Opcode::JR_Z_N: condition = zFlag(); break;
+        case Opcode::JR_NC_N: condition = !cFlag(); break;
+        case Opcode::JR_C_N: condition = cFlag(); break;
+    }
+
+    if (condition) {
+        _programCounter += offset;
+    }
+
+    return 2;
 }

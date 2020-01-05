@@ -1333,3 +1333,153 @@ TEST_CASE("set carry") {
     CLOCK(4);
     CHECK(testCPU.cFlag() == true);
 }
+
+TEST_CASE("unconditional jump") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::JP_NN,
+        0x02,
+        0x01,
+    });
+
+    CLOCK(12);
+
+    CHECK(testCPU._programCounter == 0x0102);
+}
+
+TEST_CASE("conditional jump") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::JP_NZ_NN, 0x02, 0x01,
+        Opcode::JP_NZ_NN, 0x04, 0x03,
+        Opcode::JP_Z_NN,  0x06, 0x05,
+        Opcode::JP_Z_NN,  0x08, 0x07,
+        Opcode::JP_NC_NN, 0x0A, 0x09,
+        Opcode::JP_NC_NN, 0x0C, 0x0B,
+        Opcode::JP_C_NN,  0x0E, 0x0D,
+        Opcode::JP_C_NN,  0x10, 0x0F,
+    });
+
+    testCPU.zFlag(false);
+    CLOCK(12);
+    CHECK(testCPU._programCounter == 0x0102);
+
+    testCPU._programCounter = INIT_VECTOR + 3;
+    testCPU.zFlag(true);
+    CLOCK(12);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 6);
+
+    testCPU.zFlag(true);
+    CLOCK(12);
+    CHECK(testCPU._programCounter == 0x0506);
+
+    testCPU._programCounter = INIT_VECTOR + 9;
+    testCPU.zFlag(false);
+    CLOCK(12);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 12);
+
+    testCPU.cFlag(false);
+    CLOCK(12);
+    CHECK(testCPU._programCounter == 0x090A);
+
+    testCPU._programCounter = INIT_VECTOR + 15;
+    testCPU.cFlag(true);
+    CLOCK(12);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 18);
+
+    testCPU.cFlag(true);
+    CLOCK(12);
+    CHECK(testCPU._programCounter == 0x0D0E);
+
+    testCPU._programCounter = INIT_VECTOR + 21;
+    testCPU.cFlag(false);
+    CLOCK(12);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 24);
+}
+
+TEST_CASE("jump to HL") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::JP_HL,
+    });
+
+    testCPU.regHL(0x0102);
+    CLOCK(4);
+    CHECK(testCPU._programCounter == 0x0102);
+}
+
+TEST_CASE("unconditional relative jump") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    int8_t rawNeg3 = -3;
+    auto neg3 = *reinterpret_cast<uint8_t*>(&rawNeg3);
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::JR_N,
+        0x01,
+        Opcode::JR_N,
+        neg3,
+    });
+
+    CLOCK(8);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 3);
+
+    testCPU._programCounter = INIT_VECTOR + 2;
+
+    CLOCK(8);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 1);
+}
+
+TEST_CASE("conditional relative jump") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMemory->write(INIT_VECTOR, {
+        Opcode::JR_NZ_N, 0x01,
+        Opcode::JR_NZ_N, 0x02,
+        Opcode::JR_Z_N,  0x03,
+        Opcode::JR_Z_N,  0x04,
+        Opcode::JR_NC_N, 0x05,
+        Opcode::JR_NC_N, 0x06,
+        Opcode::JR_C_N,  0x07,
+        Opcode::JR_C_N,  0x08,
+    });
+
+    testCPU.zFlag(false);
+    CLOCK(8);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 3);
+
+    testCPU._programCounter = INIT_VECTOR + 2;
+    testCPU.zFlag(true);
+    CLOCK(8);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 4);
+
+    testCPU.zFlag(true);
+    CLOCK(8);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 9);
+
+    testCPU._programCounter = INIT_VECTOR + 6;
+    testCPU.zFlag(false);
+    CLOCK(8);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 8);
+
+    testCPU.cFlag(false);
+    CLOCK(8);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 15);
+
+    testCPU._programCounter = INIT_VECTOR + 10;
+    testCPU.cFlag(true);
+    CLOCK(8);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 12);
+
+    testCPU.cFlag(true);
+    CLOCK(8);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 21);
+
+    testCPU._programCounter = INIT_VECTOR + 14;
+    testCPU.cFlag(false);
+    CLOCK(8);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 16);
+}
