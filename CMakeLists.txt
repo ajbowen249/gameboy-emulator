@@ -12,6 +12,7 @@ add_executable(
     gameboyEmulator
     src/Cartridge.cpp
     src/CPU.cpp
+    src/GameboyMotherboard.cpp
     src/main.cpp
     src/Log.cpp
     src/Motherboard.cpp
@@ -30,6 +31,7 @@ add_executable(
     tests
     src/Cartridge.cpp
     src/CPU.cpp
+    src/GameboyMotherboard.cpp
     src/Log.cpp
     src/Motherboard.cpp
     test/main.cpp

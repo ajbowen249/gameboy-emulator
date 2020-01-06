@@ -56,4 +56,4 @@ private:
     uint16_t _ramSize;
 };
 
-#endif __Cartridge_h__
+#endif // __Cartridge_h__
