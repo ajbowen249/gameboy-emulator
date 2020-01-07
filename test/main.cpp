@@ -1971,3 +1971,36 @@ TEST_CASE("reset") {
     CHECK(testCPU._regD == 0xf7);
     CHECK(testCPU._regE == 0xdf);
 }
+
+TEST_CASE("interrupts") {
+    WITH_CPU_AND_SIMPLE_MEMORY();
+
+    simpleMobo->write(INIT_VECTOR, {
+        Opcode::LD_A_n,
+        0x01,
+        Opcode::LD_aNN_A,
+        0xff,
+        0xff,
+        Opcode::EI,
+    });
+
+    simpleMobo->write(0x0040, {
+        Opcode::RETI,
+    });
+
+    simpleMobo->write(0xff0f, 0x11);
+
+    CLOCK(32);
+
+    CHECK(testCPU._interruptsEnabled == false);
+    CHECK(testCPU._programCounter == 0x0040);
+    CHECK(testCPU._stackPointer == INIT_STACK_POINTER - 2);
+    CHECK(simpleMobo->read(0xff0f) == 0x10);
+    CHECK(simpleMobo->readLI(INIT_STACK_POINTER - 2) == INIT_VECTOR + 6);
+
+    CLOCK(8);
+
+    CHECK(testCPU._interruptsEnabled == true);
+    CHECK(testCPU._programCounter == INIT_VECTOR + 6);
+    CHECK(testCPU._stackPointer == INIT_STACK_POINTER);
+}

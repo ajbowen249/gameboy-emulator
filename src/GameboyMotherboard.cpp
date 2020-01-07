@@ -18,7 +18,7 @@ uint8_t GameboyMotherboard::read(uint16_t addr) {
     } else if (addr >= SPRITE_RAM_START && addr <= SPRITE_RAM_END) {
         return _spriteRam[addr - SPRITE_RAM_START];
     } else if (addr >= IO_CHANNEL_START && addr <= IO_CHANNEL_END) {
-        return 0; // TODO: IO Channel
+        return _ioChannel[addr - IO_CHANNEL_START];
     } else if (addr >= HIGH_RAM_START && addr <= HIGH_RAM_END) {
         return _highRam[addr - HIGH_RAM_START];
     } else if (addr == INERRUPT_ENABLE_REGISTER) {
@@ -46,7 +46,7 @@ void GameboyMotherboard::write(uint16_t addr, uint8_t value) {
     } else if (addr >= SPRITE_RAM_START && addr <= SPRITE_RAM_END) {
         _spriteRam[addr - SPRITE_RAM_START] = value;
     } else if (addr >= IO_CHANNEL_START && addr <= IO_CHANNEL_END) {
-        // TODO: IO Channel
+        _ioChannel[addr - IO_CHANNEL_START] = value;
     } else if (addr >= HIGH_RAM_START && addr <= HIGH_RAM_END) {
         _highRam[addr - HIGH_RAM_START] = value;
     } else if (addr == INERRUPT_ENABLE_REGISTER) {

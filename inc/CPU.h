@@ -84,6 +84,8 @@ private:
     void machineCycle();
     int8_t decodeAndExecute();
 
+    bool CheckAndServiceInterrupt();
+
     // Instruction functions return the number of machine cycles they should
     // take to execute.
 

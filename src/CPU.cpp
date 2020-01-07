@@ -1,9 +1,12 @@
 #include "CPU.h"
 
+#include "IORegister.h"
 #include "Log.h"
+#include "Motherboard.h"
 #include "Opcodes.h"
 #include "Util.h"
 
+#include <map>
 #include <sstream>
 
 CPU::CPU(Motherboard::Ptr mobo) : _mobo(mobo) {
@@ -14,7 +17,7 @@ void CPU::reset() {
     _programCounter = INIT_VECTOR;
     _stackPointer = INIT_STACK_POINTER;
     _flags = 0;
-    _interruptsEnabled = true;
+    _interruptsEnabled = false;
     _isHalted = false;
     _isStopped = false;
 
@@ -41,7 +44,44 @@ void CPU::machineCycle() {
         return;
     }
 
-    _awaitingMachineCycles = decodeAndExecute() - 1;
+    _awaitingMachineCycles = CheckAndServiceInterrupt() ? 0 : decodeAndExecute() - 1;
+}
+
+static std::map<uint8_t, uint16_t> isrMap = {
+    { 0x01, 0x0040 },
+    { 0x02, 0x0048 },
+    { 0x04, 0x0050 },
+    { 0x08, 0x0058 },
+    { 0x10, 0x0060 },
+};
+
+bool CPU::CheckAndServiceInterrupt() {
+    if (!_interruptsEnabled) {
+        return false;
+    }
+
+    auto ifRegister = _mobo->read(IORegister::IF);
+    auto ieRegister = _mobo->read(INERRUPT_ENABLE_REGISTER);
+
+    uint8_t pendingInterrupts = ifRegister & ieRegister;
+    if (pendingInterrupts == 0x00) {
+        return false;
+    }
+
+    for (uint8_t index = 0x01; index < 0x20; index <<= 1) {
+        if (pendingInterrupts & index) {
+            _stackPointer -= 2;
+            _mobo->writeLI(_stackPointer, _programCounter);
+
+            _mobo->write(IORegister::IF, ifRegister & ~index);
+            _interruptsEnabled = false;
+
+            _programCounter = isrMap[index];
+            return true;
+        }
+    }
+
+    return false;
 }
 
 int8_t CPU::decodeAndExecute() {
